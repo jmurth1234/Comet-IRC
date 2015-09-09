@@ -1,0 +1,191 @@
+<head>
+    <title>Comet IRC</title>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+
+    <meta name="mobile-web-app-capable" content="yes"/>
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+</head>
+
+<body>
+
+    <div class="off-canvas-wrap" data-offcanvas>
+        <div class="inner-wrap">
+            <nav class="tab-bar">
+                <section class="left-small">
+                    <a class="left-off-canvas-toggle menu-icon" href="#">
+                        <span></span>
+                    </a>
+                </section>
+
+                <section class="middle tab-bar-section">
+                    <h1 class="title">Comet IRC</h1>
+                </section>
+
+                <section class="left left-off-canvas-toggle tab-bar-section">
+                    <h1 class="title">Channels</h1>
+                </section>
+
+                <section class="right right-off-canvas-toggle tab-bar-section">
+                    <h1 class="title">Users</h1>
+                </section>
+
+                <section class="right-small">
+                    <a class="right-off-canvas-toggle menu-icon" href="#">
+                        <span></span>
+                    </a>
+                </section>
+            </nav>
+
+            <aside class="left-off-canvas-menu">
+                <ul class="off-canvas-list">
+                    {{#each channels}} {{> channel}} {{/each}}
+                </ul>
+            </aside>
+
+            <aside class="right-off-canvas-menu">
+                <ul class="off-canvas-list">
+                    <li>
+                        <label>Users</label>
+                    </li>
+                    <li><a href="#">rymate1234</a></li>
+                    <li><a href="#">...</a></li>
+                </ul>
+            </aside>
+
+            <section class="main-section">
+
+                <nav class="top-bar">
+                    <section class="top-bar-section">
+                        {{#if currentUser}}
+                        <!-- Left Nav Section -->
+                        <ul class="left">
+                            <li><a href="#" class="bold" data-reveal-id="connectModal">Connect to a Server</a></li>
+                        </ul>
+
+                        <!-- Right Nav Section -->
+                        <ul class="right">
+                            <li class=""><a id="logout" href="#">Logout</a></li>
+                            <li class=""><a href="#">Settings</a></li>
+                        </ul>
+
+                        {{else}}
+                        <ul class="right">
+                            <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login / Sign up</a></li>
+                        </ul>
+
+                        {{/if}}
+
+                    </section>
+                </nav>
+
+                <main>
+                    <div id="connectModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+                        {{> serverconnect}}
+                    </div>
+
+                    <div id="loginModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+                        {{> loginform}}
+                    </div>
+
+                    <div class="panel">
+                        <div id="messages">
+                            <ul class="messages">
+                                {{#each messages}} {{> message}} {{/each}}
+                            </ul>
+                        </div>
+                        {{> channelmsg}}
+                    </div>
+                </main>
+            </section>
+
+            <a class="exit-off-canvas"></a>
+
+        </div>
+    </div>
+
+
+</body>
+
+<template name="message">
+    {{#if action}}
+        <li class="message">[{{time}}]<span style="font-style: italic;"> * {{handle}} {{text}}</span></li>
+        {{else}}
+        <li class="message">[{{time}}] &lt;{{handle}}&gt; {{text}}</li>
+    {{/if}}
+
+</template>
+
+<template name="channel">
+    {{#if title}}
+        <li><label>{{name}}</label></li>
+    {{else}}
+        <li><a href="#" channel="{{name}}" id="{{server_id}}" class="channel">{{name}}</a></li>
+    {{/if}}
+
+</template>
+
+<template name="serverconnect">
+    <form id="connect-form">
+        <label for="irc_server_name">Server Name (Optional)</label>
+        <input id="irc_server_name" type="text" class="validate">
+
+        <div class="row collapse">
+            <div class="small-9 large-10 columns">
+                <label for="irc_server">IRC Server</label>
+                <input name="irc_server" type="text" placeholder="Hostname or IP">
+            </div>
+            <div class="small-3 large-2 columns">
+                <label for="irc_port" style="color: #fff">.</label>
+                <input type="text" class="postfix" name="irc_port" placeholder="Port">
+            </div>
+        </div>
+
+        <label for="irc_nick">Nickname</label>
+        <input id="irc_nick" type="text" class="validate">
+
+        <label for="irc_password">IRC Password</label>
+        <input id="irc_password" type="password" class="validate">
+
+        <label for="channel">Channel</label>
+        <input id="channel" type="text" class="validate">
+
+        <button class="button success" aria-label="Close" type="submit" name="action">Connect</button>
+    </form>
+
+</template>
+
+<template name="loginform">
+    <form class="row">
+        <div class="input-field">
+            <label for="username">Username</label>
+            <input id="username" type="text" class="validate">
+        </div>
+        <div class="input-field">
+            <label for="password">Password</label>
+            <input id="password" type="password" class="validate">
+        </div>
+
+        <div class="button-group round">
+            <a href="#!" id="login" class="button half-width success">Login</a>
+            <a href="#!" id="signup" class="button half-width secondary">Sign Up</a>
+        </div>
+    </form>
+</template>
+
+
+<template name="channelmsg">
+    <form id="connect-form">
+        <div class="large-12 columns">
+            <div class="row collapse">
+                <div class="small-9 large-11 columns">
+                    <input type="text" name="irc_msg" class="nomargin" placeholder="Message">
+                </div>
+                <div class="small-3 large-1 columns">
+                    <button type="submit" name="action" class="nomargin button postfix">Send</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</template>
