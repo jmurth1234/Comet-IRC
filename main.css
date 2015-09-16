@@ -36,6 +36,12 @@ main {
 .panel #messages {
     flex: 2 ;
     overflow: auto;
+    max-width: 100%;
+}
+
+.message {
+    word-wrap: break-word;
+    -ms-word-wrap: break-word;
 }
 
 .columns > .row {
@@ -122,10 +128,6 @@ main {
         padding: 0 15px;
         line-height: 45px;
         background: #333333;
-    }
-
-    section ul li {
-        float: left;
     }
 
     .left-off-canvas-toggle {

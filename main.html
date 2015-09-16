@@ -14,7 +14,7 @@
         <div class="inner-wrap">
             <nav class="tab-bar">
                 <section class="left-small">
-                    <a class="left-off-canvas-toggle menu-icon" href="#">
+                    <a id="left-hamburger" class="left-off-canvas-toggle menu-icon" href="#">
                         <span></span>
                     </a>
                 </section>
@@ -32,7 +32,7 @@
                 </section>
 
                 <section class="right-small">
-                    <a class="right-off-canvas-toggle menu-icon" href="#">
+                    <a id="right-hamburger" class="right-off-canvas-toggle menu-icon" href="#">
                         <span></span>
                     </a>
                 </section>
@@ -54,8 +54,8 @@
                 </ul>
             </aside>
 
+            {{#HammerTouchArea gestureMap=bodyGestures}}
             <section class="main-section">
-
                 <nav class="top-bar">
                     <section class="top-bar-section">
                         {{#if currentUser}}
@@ -98,7 +98,9 @@
                         {{> channelmsg}}
                     </div>
                 </main>
+
             </section>
+            {{/HammerTouchArea}}
 
             <a class="exit-off-canvas"></a>
 
@@ -110,9 +112,9 @@
 
 <template name="message">
     {{#if action}}
-        <li class="message">[{{time}}]<span style="font-style: italic;"> * {{handle}} {{text}}</span></li>
+        <li class="message">[{{time}}]<span style="font-style: italic;"> * {{handle}} {{{text}}}</span></li>
         {{else}}
-        <li class="message">[{{time}}] &lt;{{handle}}&gt; {{text}}</li>
+        <li class="message">[{{time}}] &lt;{{handle}}&gt; {{{text}}}</li>
     {{/if}}
 
 </template>
@@ -151,7 +153,10 @@
         <label for="channel">Channel</label>
         <input id="channel" type="text" class="validate">
 
-        <button class="button success" aria-label="Close" type="submit" name="action">Connect</button>
+        <div class="button-group round">
+            <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect</button>
+            <button aria-label="Close" class="button half-width secondary">Cancel</button>
+        </div>
     </form>
 
 </template>
@@ -174,13 +179,12 @@
     </form>
 </template>
 
-
 <template name="channelmsg">
     <form id="connect-form">
         <div class="large-12 columns">
             <div class="row collapse">
                 <div class="small-9 large-11 columns">
-                    <input type="text" name="irc_msg" class="nomargin" placeholder="Message">
+                    <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin" placeholder="Message">
                 </div>
                 <div class="small-3 large-1 columns">
                     <button type="submit" name="action" class="nomargin button postfix">Send</button>

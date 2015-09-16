@@ -4,7 +4,7 @@ if (Meteor.isClient) {
     Meteor.subscribe("IRCUsers");
     Meteor.subscribe("IRCConnections");
 
-    serverMessages.listen('serverMessage:ping', function (title, message) {
+    serverMessages.listen('serverMessage:' + Meteor.userId(), function (title, message) {
         sendNotification(title, message);
     });
 
@@ -23,7 +23,13 @@ if (Meteor.isClient) {
 
     Template.body.helpers({
         messages: function() {
-            return IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: 1}});
+            return IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: 1}, transform: function(doc) {
+                if(doc.text) {
+                    doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
+                    console.log(doc.text);
+                }
+                return doc;
+            }});
         },
 
         channels: function() {
@@ -37,6 +43,16 @@ if (Meteor.isClient) {
                 });
             });
             return list;
+        },
+
+        bodyGestures: {
+            'swiperight .main-section': function (event, templateInstance) {
+                jQuery("#left-hamburger").click();
+            },
+
+            'swipeleft .main-section': function (event, templateInstance) {
+                jQuery("#right-hamburger").click();
+            }
         }
     });
 
@@ -44,6 +60,11 @@ if (Meteor.isClient) {
     Template.message.rendered = function(){
         jQuery('#messages').scrollTop( jQuery('#messages').prop("scrollHeight") );
     };
+
+    Template.channelmsg.rendered = function () {
+        if (Meteor.Device.isPhone())
+            jQuery("#msginput").attr("autocomplete", "on");
+    }
 
     Template.serverconnect.events({
         "submit form": function(event) {
@@ -182,8 +203,16 @@ if (Meteor.isClient) {
     }
 
     function sendNotification(title, message) {
-        if (!("Notification" in window)) {
-            alert("This browser does not support desktop notification");
+        if (Meteor.isCordova) {
+            cordova.plugins.notification.local.schedule({
+                title: title,
+                message: message
+            });
+        }
+        else if (!("Notification" in window)) {
+            //alert("This browser does not support desktop notification");
+            toastr.info(message, title)
+
         }
         else if (Notification.permission === "granted") {
             var options = {

@@ -44,9 +44,12 @@ IRC.prototype.connect = function() {
         self.send('NICK', self.config.nick);
         self.send('USER', self.config.username, 8, "*", self.config.realname);
 
+        self.send('CAP', 'LS');
         self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+        self.send('CAP', 'END');
 
-        self.send('PASS', self.config.password);
+        if (self.config.password !== "")
+            self.send('PASS', self.config.password);
 
         _.each(self.config.channels, function(channel) {
             self.send('JOIN', channel);
@@ -64,6 +67,8 @@ IRC.prototype.connect = function() {
 
             //if (dirtyLine.indexOf("353") != -1)
                 //console.log(line)
+            if (self.config.debug) console.log(line.command + ": " + line.prefix + " " + line.args.join(" "));
+
 
             switch (line.command) {
                 case "PING":
@@ -98,7 +103,7 @@ IRC.prototype.connect = function() {
 
                     if (text.indexOf(self.config.nick) !== -1) {
                         console.log("mentioned!")
-                        serverMessages.notify('serverMessage:ping', "You were mentioned in " + channel, text);
+                        serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel, text);
                     }
 
                     addMessageToDb(self, channel, handle, text, action, date);
@@ -123,12 +128,35 @@ IRC.prototype.connect = function() {
                     }
                     break;
                 case "QUIT":
-                    if (self.config.debug) console.log("QUIT: " + line.prefix + " " + line.args.join(" "));
+                    // TODO
+                    break;
                 case "PART":
                     addMessageToDb(self, line.args[0], "", line.prefix + " left the channel!", true);
+
+                    if (self.channels.indexOf(line.args[0]) === -1) {
+                        self.channels.push(line.args[0]);
+                        IRCChannels.insert({
+                            channel: line.args[0],
+                            server: self.config.server_id,
+                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                            user: self.config.user,
+                        });
+                    }
+
                     break;
                 case "JOIN":
                     addMessageToDb(self, line.args[0], "", line.prefix + " joined the channel!", true);
+
+                    if (self.channels.indexOf(line.args[0]) === -1) {
+                        self.channels.push(line.args[0]);
+                        IRCChannels.insert({
+                            channel: line.args[0],
+                            server: self.config.server_id,
+                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                            user: self.config.user,
+                        });
+                    }
+
                     break;
                 case "NICK":
                     // TODO: handle nick changes
@@ -173,7 +201,7 @@ IRC.prototype.connect = function() {
             handle: user,
             channel: chan,
             server: self.config.server_id,
-            text: message,
+            text: escapeHtml(message),
             date_time: date,
             time: currentTime,
             action: action,
@@ -182,6 +210,7 @@ IRC.prototype.connect = function() {
             bot: false
         });
     }
+
 };
 
 /**
@@ -262,7 +291,7 @@ IRC.prototype.say = function(channel, message) {
     IRCMessages.insert({
         handle: this.config.nick,
         channel: channel,
-        text: message,
+        text: escapeHtml(message),
         date_time: date,
         time: currentTime,
         action: false,
@@ -290,7 +319,7 @@ IRC.prototype.action = function(channel, message) {
     IRCMessages.insert({
         handle: this.config.nick,
         channel: channel,
-        text: message.replace("/me ", ""),
+        text: escapeHtml(message.replace("/me ", "")),
         date_time: date,
         time: currentTime,
         action: true,
@@ -380,3 +409,19 @@ IRC.prototype.parseLine = function(line) {
 
     return message;
 };
+
+
+var entityMap = {
+    "&": "&",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': '&quot;',
+    "'": '&#39;',
+    "/": '/'
+};
+
+function escapeHtml(string) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
+        return entityMap[s];
+    });
+}
