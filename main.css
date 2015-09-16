@@ -50,10 +50,13 @@ main {
 
 .tab-bar-section.left {
     padding-left: 2.8rem;
+    width: 200px;
 }
 
 .tab-bar-section.right {
     padding-right: 2.8rem;
+    width: 200px;
+    left: auto !important;
     margin-left: 5rem;
 }
 
@@ -117,7 +120,11 @@ main {
     list-style: none;
 }
 
-@media only screen and (min-width: 150px) and (max-width: 650px){   /* only --> tells older browsers to ignore this code*/
+.main-section {
+    margin-top: -2px;  /* hacky fix for certain mobile webkit browsers */
+}
+
+@media only screen and (min-width: 150px) and (max-width: 650px){
     .top-bar-section ul {
         width: auto;
         height: auto !important;
