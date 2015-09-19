@@ -153,14 +153,20 @@ IRC.prototype.connect = function() {
 
                     var userList = line.args[3].split(" ");
 
-                    userList.forEach( function(s) {
-                        IRCUsers.insert({
-                            channel: line.args[2],
-                            server: self.config.server_id,
-                            ircuser: s,
-                            user: self.config.user,
+                    var addUsers = function (userList) {
+                        userList.forEach( function(s) {
+                            IRCUsers.insert({
+                                channel: line.args[2],
+                                server: self.config.server_id,
+                                ircuser: s,
+                                user: self.config.user,
+                            });
                         });
-                    } );
+                    };
+
+                    var addUsersAsync = Meteor.wrapAsync(addUsers);
+                    addUsersAsync(userList);
+                    
                     break;
                 case "332":
                     addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
