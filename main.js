@@ -2,7 +2,7 @@ if (Meteor.isClient) {
     var ITEMS_INCREMENT = 200;
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
-    Meteor.subscribe("IRCChannels");
+    //Meteor.subscribe("IRCChannels");
     Meteor.subscribe("IRCUsers");
     Meteor.subscribe("IRCConnections");
 
@@ -27,6 +27,7 @@ if (Meteor.isClient) {
             var currChannel = jQuery(event.target).text();
             Session.set(currChannel + "Limit", ITEMS_INCREMENT);
             Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+            Meteor.subscribe("IRCChannels", currChannel);
 
             Session.set("currChannel", currChannel);
             Session.set("currServer", event.currentTarget.id);
@@ -278,9 +279,10 @@ if (Meteor.isServer) {
         });
     });
 
-    Meteor.publish("IRCUsers", function() {
+    Meteor.publish("IRCUsers", function(currChannel) {
         return IRCUsers.find({
-            user: this.userId
+            user: this.userId,
+            channel: currChannel
         });
     });
 
