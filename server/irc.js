@@ -64,9 +64,7 @@ IRC.prototype.connect = function() {
         self.buffer = lines.pop();
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
-
-            if (self.config.debug) console.log(line.command + ": " + line.prefix + " " + line.args.join(" "));
-
+            
             switch (line.command) {
                 case "PING":
                     self.send("PONG", line.args[0]);
@@ -153,20 +151,22 @@ IRC.prototype.connect = function() {
 
                     var userList = line.args[3].split(" ");
 
-                    var addUsers = function (userList) {
-                        userList.forEach( function(s) {
-                            IRCUsers.insert({
-                                channel: line.args[2],
-                                server: self.config.server_id,
-                                ircuser: s,
-                                user: self.config.user,
-                            });
-                        });
-                    };
+                    //var addUsers = function (userList) {
+                    Meteor.defer( function () {
+                            userList.forEach(function (s) {
+                                IRCUsers.insert({
+                                    channel: line.args[2],
+                                    server: self.config.server_id,
+                                    ircuser: s,
+                                    user: self.config.user,
+                                });
+                            })
+                        }
+                    );
 
-                    var addUsersAsync = Meteor.wrapAsync(addUsers);
-                    addUsersAsync(userList);
-                    
+                    //var addUsersAsync = Meteor.wrapAsync(addUsers);
+                    //addUsersAsync(userList);
+
                     break;
                 case "332":
                     addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
