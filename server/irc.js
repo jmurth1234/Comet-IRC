@@ -65,10 +65,7 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
-            //if (dirtyLine.indexOf("353") != -1)
-                //console.log(line)
             if (self.config.debug) console.log(line.command + ": " + line.prefix + " " + line.args.join(" "));
-
 
             switch (line.command) {
                 case "PING":
@@ -158,12 +155,29 @@ IRC.prototype.connect = function() {
                     }
 
                     break;
+                case "353":
+                    if (line.args[0] !== self.config.nick)
+                        self.config.nick = line.args[0];
+
+                    var userList = line.args[3].split(" ");
+
+                    userList.forEach( function(s) {
+                        IRCUsers.insert({
+                            channel: line.args[2],
+                            server: self.config.server_id,
+                            ircuser: s,
+                            user: self.config.user,
+                        });
+                    } );
+                    break;
+                case "332":
+                    addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
+                    break;
                 case "NICK":
                     // TODO: handle nick changes
                     // DEPENDS ON LIST OF USERS
                     break;
                 default:
-                    if (self.config.debug) console.log(line.command + ": " + line.prefix + " " + line.args.join(" "));
                     break;
             }
         });

@@ -1,11 +1,18 @@
 if (Meteor.isClient) {
-    Meteor.subscribe("IRCMessages");
+    var ITEMS_INCREMENT = 20;
+
+    //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
     Meteor.subscribe("IRCChannels");
     Meteor.subscribe("IRCUsers");
     Meteor.subscribe("IRCConnections");
 
     serverMessages.listen('serverMessage:' + Meteor.userId(), function (title, message) {
         sendNotification(title, message);
+    });
+
+    serverMessages.listen('serverUpdate:' + Meteor.userId(), function (channel) {
+        Session.set(channel + "Limit", Session.get(channel + "Limit") + 1);
+        Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
     });
 
     Template.body.events({
@@ -15,7 +22,9 @@ if (Meteor.isClient) {
         },
         "click .channel": function (event) {
             var currChannel = jQuery(event.target).text();
-            console.log(currChannel);
+            Session.set(currChannel + "Limit", ITEMS_INCREMENT);
+            Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+
             Session.set("currChannel", currChannel);
             Session.set("currServer", event.currentTarget.id);
         }
@@ -23,14 +32,26 @@ if (Meteor.isClient) {
 
     Template.body.helpers({
         messages: function() {
-            return IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: 1}, transform: function(doc) {
+            var list = [];
+            var messages =  IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: -1}, transform: function(doc) {
                 if(doc.text) {
                     doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
                     console.log(doc.text);
                 }
                 return doc;
             }});
+
+            messages.forEach(function (message) {
+                list.push(message);
+            });
+
+            return list.reverse();
         },
+
+        users: function() {
+            return IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser: 1}});
+        },
+
 
         channels: function() {
             var list = [];
@@ -55,7 +76,6 @@ if (Meteor.isClient) {
             }
         }
     });
-
 
     Template.message.rendered = function(){
         jQuery('#messages').scrollTop( jQuery('#messages').prop("scrollHeight") );
@@ -242,10 +262,15 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
     var connections = new HashMap1d();
 
-    Meteor.publish("IRCMessages", function() {
+    IRCMessages.after.insert(function (userId, doc) {
+        serverMessages.notify('serverUpdate:' + this.userId, doc.channel);
+    });
+
+    Meteor.publish("IRCMessages", function(limit, currChannel) {
         return IRCMessages.find({
-            user: this.userId
-        });
+            user: this.userId,
+            channel: currChannel
+        }, {limit: limit, sort: {date_time: -1}});
     });
 
     Meteor.publish("IRCChannels", function() {

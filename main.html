@@ -49,8 +49,8 @@
                     <li>
                         <label>Users</label>
                     </li>
-                    <li><a href="#">rymate1234</a></li>
-                    <li><a href="#">...</a></li>
+                    {{#each users}} {{> user}} {{/each}}
+
                 </ul>
             </aside>
 
@@ -91,6 +91,9 @@
 
                     <div class="panel">
                         <div id="messages">
+                            <div data-alert class="alert-box secondary">
+                                <button class="button tiny" id="loadmore">Load more scrollback.</button>
+                            </div>
                             <ul class="messages">
                                 {{#each messages}} {{> message}} {{/each}}
                             </ul>
@@ -123,9 +126,13 @@
     {{#if title}}
         <li><label>{{name}}</label></li>
     {{else}}
-        <li><a href="#" channel="{{name}}" id="{{server_id}}" class="channel">{{name}}</a></li>
+        <li><a href="#" id="{{server_id}}" class="channel">{{name}}</a></li>
     {{/if}}
 
+</template>
+
+<template name="user">
+    <li><a href="#" id="{{server}}" class="channel">{{ircuser}}</a></li>
 </template>
 
 <template name="serverconnect">
