@@ -1,5 +1,5 @@
 if (Meteor.isClient) {
-    var ITEMS_INCREMENT = 20;
+    var ITEMS_INCREMENT = 200;
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
     Meteor.subscribe("IRCChannels");
@@ -11,14 +11,17 @@ if (Meteor.isClient) {
     });
 
     serverMessages.listen('serverUpdate:' + Meteor.userId(), function (channel) {
-        Session.set(channel + "Limit", Session.get(channel + "Limit") + 1);
-        Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
+
     });
 
     Template.body.events({
         "click #logout": function(event) {
             Meteor.logout();
             location.hash = "";
+        },
+        "click #loadmore": function(event) {
+            Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT );
+            Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
         },
         "click .channel": function (event) {
             var currChannel = jQuery(event.target).text();
@@ -261,10 +264,6 @@ if (Meteor.isClient) {
 
 if (Meteor.isServer) {
     var connections = new HashMap1d();
-
-    IRCMessages.after.insert(function (userId, doc) {
-        serverMessages.notify('serverUpdate:' + this.userId, doc.channel);
-    });
 
     Meteor.publish("IRCMessages", function(limit, currChannel) {
         return IRCMessages.find({
