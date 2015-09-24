@@ -64,7 +64,7 @@ IRC.prototype.connect = function() {
         self.buffer = lines.pop();
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
-            
+
             switch (line.command) {
                 case "PING":
                     self.send("PONG", line.args[0]);
@@ -416,8 +416,6 @@ IRC.prototype.parseLine = function(line) {
 
     if (typeof(trailing) != 'undefined' && trailing.length)
         message.args.push(trailing);
-
-
 
     return message;
 };

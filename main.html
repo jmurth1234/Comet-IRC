@@ -5,110 +5,117 @@
     <meta name="mobile-web-app-capable" content="yes"/>
 
     <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"/>
+    <link rel="import" href="bower_components/polymer/polymer.html">
+
+    <link rel="import" href="bower_components/core-drawer-panel/core-drawer-panel.html">
 </head>
 
-<body>
+<body >
 
-    <div class="off-canvas-wrap" data-offcanvas>
-        <div class="inner-wrap">
-            <nav class="tab-bar">
-                <section class="left-small">
-                    <a id="left-hamburger" class="left-off-canvas-toggle menu-icon" href="#">
-                        <span></span>
+<core-drawer-panel>
+    <div drawer>
+        <ul class="off-canvas-list">
+            {{#each channels}} {{> channel}} {{/each}}
+        </ul>
+    </div>
+    <div main>
+        <div class="off-canvas-wrap" data-offcanvas>
+            <div class="inner-wrap">
+                <nav class="tab-bar">
+                    <section class="left-small">
+                        <a id="left-hamburger" class="menu-icon" href="#" core-drawer-toggle>
+                            <span></span>
+                        </a>
+                    </section>
+
+                    <section class="middle tab-bar-section">
+                        <h1 class="title">Comet IRC</h1>
+                    </section>
+
+                    <a class="left tab-bar-section" href="#" core-drawer-toggle>
+                        <h1 class="title">Channels</h1>
                     </a>
-                </section>
 
-                <section class="middle tab-bar-section">
-                    <h1 class="title">Comet IRC</h1>
-                </section>
+                    <section class="right right-off-canvas-toggle tab-bar-section">
+                        <h1 class="title">Users</h1>
+                    </section>
 
-                <section class="left left-off-canvas-toggle tab-bar-section">
-                    <h1 class="title">Channels</h1>
-                </section>
-
-                <section class="right right-off-canvas-toggle tab-bar-section">
-                    <h1 class="title">Users</h1>
-                </section>
-
-                <section class="right-small">
-                    <a id="right-hamburger" class="right-off-canvas-toggle menu-icon" href="#">
-                        <span></span>
-                    </a>
-                </section>
-            </nav>
-
-            <aside class="left-off-canvas-menu">
-                <ul class="off-canvas-list">
-                    {{#each channels}} {{> channel}} {{/each}}
-                </ul>
-            </aside>
-
-            <aside class="right-off-canvas-menu">
-                <ul class="off-canvas-list">
-                    <li>
-                        <label>Users</label>
-                    </li>
-                    {{#each users}} {{> user}} {{/each}}
-
-                </ul>
-            </aside>
-
-            {{#HammerTouchArea gestureMap=bodyGestures}}
-            <section class="main-section">
-                <nav class="top-bar">
-                    <section class="top-bar-section">
-                        {{#if currentUser}}
-                        <!-- Left Nav Section -->
-                        <ul class="left">
-                            <li><a href="#" class="bold" data-reveal-id="connectModal">Connect to a Server</a></li>
-                        </ul>
-
-                        <!-- Right Nav Section -->
-                        <ul class="right">
-                            <li class=""><a id="logout" href="#">Logout</a></li>
-                            <li class=""><a href="#">Settings</a></li>
-                        </ul>
-
-                        {{else}}
-                        <ul class="right">
-                            <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login / Sign up</a></li>
-                        </ul>
-
-                        {{/if}}
-
+                    <section class="right-small">
+                        <a id="right-hamburger" class="right-off-canvas-toggle menu-icon" href="#">
+                            <span></span>
+                        </a>
                     </section>
                 </nav>
 
-                <main>
-                    <div id="connectModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
-                        {{> serverconnect}}
-                    </div>
+                <aside class="right-off-canvas-menu">
+                    <ul class="off-canvas-list">
+                        <li>
+                            <label>Users</label>
+                        </li>
+                        {{#each users}} {{> user}} {{/each}}
 
-                    <div id="loginModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
-                        {{> loginform}}
-                    </div>
+                    </ul>
+                </aside>
 
-                    <div class="panel">
-                        <div id="messages">
-                            <div data-alert class="alert-box secondary">
-                                <button class="button tiny" id="loadmore">Load more scrollback.</button>
-                            </div>
-                            <ul class="messages">
-                                {{#each messages}} {{> message}} {{/each}}
-                            </ul>
+                <section class="main-section">
+                    <nav class="top-bar">
+                        <section class="top-bar-section">
+                            {{#if currentUser}}
+                                <!-- Left Nav Section -->
+                                <ul class="left">
+                                    <li><a href="#" class="bold" data-reveal-id="connectModal">Connect to a
+                                        Server</a></li>
+                                </ul>
+
+                                <!-- Right Nav Section -->
+                                <ul class="right">
+                                    <li class=""><a id="logout" href="#">Logout</a></li>
+                                    <li class=""><a href="#">Settings</a></li>
+                                </ul>
+
+                            {{else}}
+                                <ul class="right">
+                                    <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login /
+                                        Sign up</a></li>
+                                </ul>
+
+                            {{/if}}
+
+                        </section>
+                    </nav>
+
+                    <main>
+                        <div id="connectModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle"
+                             aria-hidden="true" role="dialog">
+                            {{> serverconnect}}
                         </div>
-                        {{> channelmsg}}
-                    </div>
-                </main>
 
-            </section>
-            {{/HammerTouchArea}}
+                        <div id="loginModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle"
+                             aria-hidden="true" role="dialog">
+                            {{> loginform}}
+                        </div>
 
+                        <div class="panel">
+                            <div id="messages">
+                                <div data-alert class="alert-box secondary">
+                                    <button class="button tiny" id="loadmore">Load more scrollback.</button>
+                                </div>
+                                <ul class="messages">
+                                    {{#each messages}} {{> message}} {{/each}}
+                                </ul>
+                            </div>
+                            {{> channelmsg}}
+                        </div>
+                    </main>
+
+                </section>
+
+            </div>
             <a class="exit-off-canvas"></a>
-
         </div>
     </div>
+</core-drawer-panel>
 
 
 </body>
@@ -116,7 +123,7 @@
 <template name="message">
     {{#if action}}
         <li class="message">[{{time}}]<span style="font-style: italic;"> * {{handle}} {{{text}}}</span></li>
-        {{else}}
+    {{else}}
         <li class="message">[{{time}}] &lt;{{handle}}&gt; {{{text}}}</li>
     {{/if}}
 
@@ -143,11 +150,11 @@
         <div class="row collapse">
             <div class="small-9 large-10 columns">
                 <label for="irc_server">IRC Server</label>
-                <input name="irc_server" type="text" placeholder="Hostname or IP">
+                <input id="irc_server" type="text" placeholder="Hostname or IP">
             </div>
             <div class="small-3 large-2 columns">
                 <label for="irc_port" style="color: #fff">.</label>
-                <input type="text" class="postfix" name="irc_port" placeholder="Port">
+                <input type="text" class="postfix" id="irc_port" placeholder="Port">
             </div>
         </div>
 
@@ -161,7 +168,8 @@
         <input id="channel" type="text" class="validate">
 
         <div class="button-group round">
-            <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect</button>
+            <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect
+            </button>
             <button aria-label="Close" class="button half-width secondary">Cancel</button>
         </div>
     </form>
@@ -191,7 +199,8 @@
         <div class="large-12 columns">
             <div class="row collapse">
                 <div class="small-9 large-11 columns">
-                    <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin" placeholder="Message">
+                    <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin"
+                           placeholder="Message">
                 </div>
                 <div class="small-3 large-1 columns">
                     <button type="submit" name="action" class="nomargin button postfix">Send</button>

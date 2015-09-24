@@ -9,10 +9,6 @@ if (Meteor.isClient) {
         sendNotification(title, message);
     });
 
-    serverMessages.listen('serverUpdate:' + Meteor.userId(), function (channel) {
-
-    });
-
     Template.body.events({
         "click #logout": function(event) {
             Meteor.logout();
@@ -21,15 +17,18 @@ if (Meteor.isClient) {
         "click #loadmore": function(event) {
             Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT );
             Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
-        },
-        "click .channel": function (event) {
-            var currChannel = jQuery(event.target).text();
-            Session.set(currChannel + "Limit", ITEMS_INCREMENT);
-            Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
-            Meteor.subscribe("IRCUsers", currChannel);
+        }
+    });
 
-            Session.set("currChannel", currChannel);
-            Session.set("currServer", event.currentTarget.id);
+    Template.channel.events({
+        "click .channel": function (event) {
+        var currChannel = jQuery(event.target).text();
+        Session.set(currChannel + "Limit", ITEMS_INCREMENT);
+        Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+        Meteor.subscribe("IRCUsers", currChannel);
+
+        Session.set("currChannel", currChannel);
+        Session.set("currServer", event.currentTarget.id);
         }
     });
 
@@ -67,16 +66,6 @@ if (Meteor.isClient) {
                 });
             });
             return list;
-        },
-
-        bodyGestures: {
-            'swiperight .main-section': function (event, templateInstance) {
-                jQuery("#left-hamburger").click();
-            },
-
-            'swipeleft .main-section': function (event, templateInstance) {
-                jQuery("#right-hamburger").click();
-            }
         }
     });
 
@@ -90,20 +79,18 @@ if (Meteor.isClient) {
     }
 
     Template.serverconnect.events({
-        "submit form": function(event) {
+        "submit form": function(e, t) {
             // Prevent default browser form submit
-            event.preventDefault();
+            e.preventDefault();
 
             var json = {
-                server: event.target.irc_server.value,
-                name: event.target.irc_server_name.value,
-                port: event.target.irc_port.value,
-                password: event.target.irc_password.value,
-                nickname: event.target.irc_nick.value,
-                channel: event.target.channel.value
+                server: t.find("#irc_server").value,
+                name: t.find("#irc_server_name").value,
+                port: t.find("#irc_port").value,
+                password: t.find("#irc_password").value,
+                nickname: t.find("#irc_nick").value,
+                channel: t.find("#channel").value
             };
-
-            channel = event.target.channel.value;
 
             console.log(json);
 
@@ -137,8 +124,6 @@ if (Meteor.isClient) {
             // retrieve the input field values
             var username = t.find('#username').value;
             var password = t.find('#password').value;
-
-            // Trim and validate your fields here....
 
             // If validation passes, supply the appropriate fields to the
             // Meteor.loginWithPassword() function.
@@ -196,8 +181,15 @@ if (Meteor.isClient) {
     Template.body.rendered = function() {
         console.log("loaded");
 
-        jQuery(document).foundation(function (response) {
-            console.log(response.errors);
+        jQuery(document).foundation({
+            offcanvas : {
+                // Sets method in which offcanvas opens.
+                // [ move | overlap_single | overlap ]
+                open_method: 'overlap',
+                // Should the menu close when a menu link is clicked?
+                // [ true | false ]
+                close_on_click : true
+            }
         });
 
         var vph = jQuery(window).height();
@@ -232,7 +224,8 @@ if (Meteor.isClient) {
                 message: message
             });
         }
-        else if (!("Notification" in window)) {
+        else
+        if (!("Notification" in window)) {
             //alert("This browser does not support desktop notification");
             toastr.info(message, title)
 
@@ -303,7 +296,6 @@ if (Meteor.isServer) {
             if (!Meteor.userId()) {
                 return;
             }
-            console.log(json);
 
             if (json.name == "") {
                 json.name = json.server;
@@ -339,6 +331,10 @@ if (Meteor.isServer) {
 
         sendMessage: function(json) {
             if (!Meteor.userId()) {
+                return;
+            }
+
+            if (json.message == "") {
                 return;
             }
 
