@@ -1,7 +1,8 @@
 {
     "polyfill": "/bower_components/webcomponentsjs/webcomponents.min.js",
-    "useShadowDom": true, // optional, defaults to shady dom (polymer default)
+    "useShadowDom": true,
     "imports": [
+	"/bower_components/polymer/polymer.html",
         "/bower_components/paper-dialog/paper-dialog.html",
         "/bower_components/paper-button/paper-button.html",
         "/bower_components/core-drawer-panel/core-drawer-panel.html"
