@@ -219,7 +219,7 @@ if (Meteor.isClient) {
     window.onresize = window.onload = function () {
         var vph = jQuery(window).height();
 
-        if (jQuery("paper-tabs")[0].css("display") === "none")
+        if (jQuery("paper-tabs").css("display") === "none")
             jQuery(".panel").height(vph - 98);
         else
             jQuery(".panel").height(vph - 150);
