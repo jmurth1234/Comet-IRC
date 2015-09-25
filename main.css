@@ -158,7 +158,7 @@ paper-tabs {
     }
 
     paper-tabs {
-        display: inline;
+        display: inline !important;
     }
 
     .top-bar-section li:not(.has-form) a:not(.button) {
