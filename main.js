@@ -114,9 +114,9 @@ if (Meteor.isClient) {
     });
 
     Template.channelmsg.events({
-        "submit form": function(event) {
+        "submit form": function(e, t) {
             // Prevent default browser form submit
-            event.preventDefault();
+            e.preventDefault();
 
             var json = {
                 channel: Session.get("currChannel"),
