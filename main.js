@@ -16,7 +16,7 @@ if (Meteor.isClient) {
         },
     });
 
-    Template.channel.events({
+    var channelEvent = {
         "click .channel": function (event) {
             var currChannel = jQuery(event.target).text();
             Session.set(currChannel + "Limit", ITEMS_INCREMENT);
@@ -26,7 +26,10 @@ if (Meteor.isClient) {
             Session.set("currChannel", currChannel);
             Session.set("currServer", event.currentTarget.id);
         }
-    });
+    };
+
+    Template.channel.events(channelEvent);
+    Template.channeltab.events(channelEvent);
 
     Template.navbar.events({
         "click #connectModalLink": function (event) {
@@ -213,9 +216,13 @@ if (Meteor.isClient) {
 
     }
 
-    window.onresize = function () {
+    window.onresize = window.onload = function () {
         var vph = jQuery(window).height();
-        jQuery(".panel").height(vph - 95);
+
+        if (jQuery("paper-tabs")[0].css("display") === "none")
+            jQuery(".panel").height(vph - 98);
+        else
+            jQuery(".panel").height(vph - 150);
     }
 
     function sendNotification(title, message) {

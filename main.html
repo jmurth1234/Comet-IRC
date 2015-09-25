@@ -6,6 +6,15 @@
 
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"/>
+
+    <link rel="import" href="bower_components/polymer/polymer.html">
+    <link rel="import" href="bower_components/core-drawer-panel/core-drawer-panel.html">
+    <link rel="import" href="bower_components/core-icon/core-icon.html">
+    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
+    <link rel="import" href="bower_components/core-icons/core-icons.html">
+    <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
+    <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
 </head>
 
 <body >
@@ -17,92 +26,78 @@
         </ul>
     </div>
     <div main>
-        <div class="off-canvas-wrap" data-offcanvas>
-            <div class="inner-wrap">
-                <!--   Old Navigation went here-->
-                <aside class="right-off-canvas-menu">
-                    <ul class="off-canvas-list">
-                        <li>
-                            <label>Users</label>
-                        </li>
-                        {{#each users}} {{> user}} {{/each}}
+        <!--   Old users list
+        <aside class="right-off-canvas-menu">
+            <ul class="off-canvas-list">
+                <li>
+                    <label>Users</label>
+                </li>
+                {{#each users}} {{> user}} {{/each}}
 
-                    </ul>
-                </aside>
+            </ul>
+        </aside> -->
 
-                <section class="main-section">
-                    <div>{{> navbar}}</div>
-
-
-                    <main>
-                        <paper-dialog id="connectModal" heading="Connect" transition="core-transition-center">
-                            {{> serverconnect}}
-                        </paper-dialog>
-
-                        <paper-dialog id="loginModal" heading="Login or Sign up" transition="core-transition-center">
-                            {{> loginform}}
-                        </paper-dialog>
-
-                        <div class="panel">
-                            <div id="messages">
-                                <div data-alert class="alert-box secondary">
-                                    <button class="button tiny" id="loadmore">Load more scrollback.</button>
-                                </div>
-                                <ul class="messages">
-                                    {{#each messages}} {{> message}} {{/each}}
-                                </ul>
-                            </div>
-                            {{> channelmsg}}
-                        </div>
-                    </main>
-
-                </section>
-
-            </div>
-            <a class="exit-off-canvas"></a>
+        <div class="nav">
+            {{> navbar}}
+            <paper-tabs link scrollable>
+                {{#each channels}} {{> channeltab}} {{/each}}
+            </paper-tabs>
         </div>
+
+        <paper-dialog id="connectModal" class="small" heading="Connect" transition="core-transition-center">
+            {{> serverconnect}}
+        </paper-dialog>
+
+        <paper-dialog id="loginModal" class="small" heading="Login or Sign up" transition="core-transition-center">
+            {{> loginform}}
+        </paper-dialog>
+
+
+        <div class="panel" id="messages">
+            <div data-alert class="alert-box secondary">
+                <button class="button tiny" id="loadmore">Load more scrollback.</button>
+            </div>
+            <ul class="messages">
+                {{#each messages}} {{> message}} {{/each}}
+            </ul>
+        </div>
+
+        {{> channelmsg}}
+
     </div>
 </core-drawer-panel>
 
 
 </body>
 
-<template name="old-navbar">
-    <nav class="top-bar">
-
-    <section class="top-bar-section">
-        {{#if currentUser}}
-            <!-- Left Nav Section -->
-            <ul class="left">
-                <li><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
-            </ul>
-
-            <!-- Right Nav Section -->
-            <ul class="right">
-                <li class=""><a id="logout" href="#">Logout</a></li>
-                <li class=""><a href="#">Settings</a></li>
-            </ul>
-
-        {{else}}
-            <ul class="right">
-                <li class=""><a href="#" id="loginModalLink">Login /
-                    Sign up</a></li>
-            </ul>
-
-        {{/if}}
-
-    </section>
-</nav>
-
-</template>
-
 <template name="navbar">
-    <core-toolbar>
-        <core-icon-button icon="menu" core-drawer-toggle></core-icon-button>
-        <div flex>Comet IRC</div>
-        <core-icon-button icon="add" id="connectModalLink"></core-icon-button>
-    </core-toolbar>
+    <nav class="top-bar">
+        <section class="top-bar-section">
+            {{#if currentUser}}
+                <!-- Left Nav Section -->
+                <ul class="left">
+                    <li class="inline"><core-icon-button core-drawer-toggle icon="menu"></core-icon-button></li>
+                    <li class="inline"><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
+                </ul>
+
+                <!-- Right Nav Section -->
+                <ul class="right">
+                    <li class=""><a id="logout" href="#">Logout</a></li>
+                </ul>
+
+            {{else}}
+                <ul class="right">
+                    <li class=""><a href="#" id="loginModalLink">Login /
+                        Sign up</a></li>
+                </ul>
+
+            {{/if}}
+
+        </section>
+    </nav>
+
 </template>
+
 
 <template name="message">
     {{#if action}}
@@ -119,8 +114,16 @@
     {{else}}
         <li><a href="#" id="{{server_id}}" class="channel">{{name}}</a></li>
     {{/if}}
-
 </template>
+
+<template name="channeltab">
+    {{#if title}}
+        <paper-tab noink><a horizontal center-center layout>{{name}}</a></paper-tab>
+    {{else}}
+        <paper-tab noink><a href="#" id="{{server_id}}" class="channel" horizontal center-center layout>{{name}}</a></paper-tab>
+    {{/if}}
+</template>
+
 
 <template name="user">
     <li><a href="#" id="{{server}}" class="channel">{{ircuser}}</a></li>
@@ -179,7 +182,7 @@
 </template>
 
 <template name="channelmsg">
-    <form id="connect-form">
+    <form class="channelmsg">
         <div class="large-12 columns">
             <div class="row collapse">
                 <div class="small-9 large-11 columns">
