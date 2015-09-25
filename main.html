@@ -19,32 +19,7 @@
     <div main>
         <div class="off-canvas-wrap" data-offcanvas>
             <div class="inner-wrap">
-                <nav class="tab-bar">
-                    <section class="left-small">
-                        <a id="left-hamburger" class="menu-icon" href="#" core-drawer-toggle>
-                            <span></span>
-                        </a>
-                    </section>
-
-                    <section class="middle tab-bar-section">
-                        <h1 class="title">Comet IRC</h1>
-                    </section>
-
-                    <a class="left tab-bar-section" href="#">
-                        <h1 class="title">Channels</h1>
-                    </a>
-
-                    <section class="right right-off-canvas-toggle tab-bar-section">
-                        <h1 class="title">Users</h1>
-                    </section>
-
-                    <section class="right-small">
-                        <a id="right-hamburger" class="right-off-canvas-toggle menu-icon" href="#">
-                            <span></span>
-                        </a>
-                    </section>
-                </nav>
-
+                <!--   Old Navigation went here-->
                 <aside class="right-off-canvas-menu">
                     <ul class="off-canvas-list">
                         <li>
@@ -56,9 +31,8 @@
                 </aside>
 
                 <section class="main-section">
-                    <nav class="top-bar">
-                        <div>{{> navbar}}</div>
-                    </nav>
+                    <div>{{> navbar}}</div>
+
 
                     <main>
                         <paper-dialog id="connectModal" heading="Connect" transition="core-transition-center">
@@ -93,7 +67,9 @@
 
 </body>
 
-<template name="navbar">
+<template name="old-navbar">
+    <nav class="top-bar">
+
     <section class="top-bar-section">
         {{#if currentUser}}
             <!-- Left Nav Section -->
@@ -116,6 +92,16 @@
         {{/if}}
 
     </section>
+</nav>
+
+</template>
+
+<template name="navbar">
+    <core-toolbar>
+        <core-icon-button icon="menu" core-drawer-toggle></core-icon-button>
+        <div flex>Comet IRC</div>
+        <core-icon-button icon="add" id="connectModalLink"></core-icon-button>
+    </core-toolbar>
 </template>
 
 <template name="message">
