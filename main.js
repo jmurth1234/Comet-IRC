@@ -10,25 +10,35 @@ if (Meteor.isClient) {
     });
 
     Template.body.events({
-        "click #logout": function(event) {
-            Meteor.logout();
-            location.hash = "";
-        },
         "click #loadmore": function(event) {
             Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT );
             Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
-        }
+        },
     });
 
     Template.channel.events({
         "click .channel": function (event) {
-        var currChannel = jQuery(event.target).text();
-        Session.set(currChannel + "Limit", ITEMS_INCREMENT);
-        Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
-        Meteor.subscribe("IRCUsers", currChannel);
+            var currChannel = jQuery(event.target).text();
+            Session.set(currChannel + "Limit", ITEMS_INCREMENT);
+            Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+            Meteor.subscribe("IRCUsers", currChannel);
 
-        Session.set("currChannel", currChannel);
-        Session.set("currServer", event.currentTarget.id);
+            Session.set("currChannel", currChannel);
+            Session.set("currServer", event.currentTarget.id);
+        }
+    });
+
+    Template.navbar.events({
+        "click #connectModalLink": function (event) {
+            console.log("test");
+            document.getElementById('connectModal').toggle();
+        },
+        "click #logout": function(event) {
+            Meteor.logout();
+            location.hash = "";
+        },
+        "click #loginModalLink": function () {
+            document.getElementById('loginModal').toggle();
         }
     });
 
@@ -96,7 +106,10 @@ if (Meteor.isClient) {
 
             Meteor.call("connectServer", json);
 
-            jQuery('#connectModal').foundation('reveal', 'close');
+            document.getElementById('connectModal').toggle();
+        },
+        "click #cancelButton": function () {
+            document.getElementById('connectModal').toggle();
         }
     });
 
@@ -180,23 +193,11 @@ if (Meteor.isClient) {
 
     Template.body.rendered = function() {
         console.log("loaded");
-
-        jQuery(document).foundation({
-            offcanvas : {
-                // Sets method in which offcanvas opens.
-                // [ move | overlap_single | overlap ]
-                open_method: 'overlap',
-                // Should the menu close when a menu link is clicked?
-                // [ true | false ]
-                close_on_click : true
-            }
-        });
-
         var vph = jQuery(window).height();
         jQuery(".panel").height(vph - 95);
 
         if (!Meteor.userId()) {
-            jQuery('#loginModalLink').trigger('click');
+            document.getElementById('loginModal').toggle();
         }
 
         jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function() {

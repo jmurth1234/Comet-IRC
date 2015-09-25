@@ -9,6 +9,8 @@
     <link rel="import" href="bower_components/polymer/polymer.html">
 
     <link rel="import" href="bower_components/core-drawer-panel/core-drawer-panel.html">
+    <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
+    <link rel="import" href="bower_components/paper-button/paper-button.html">
 </head>
 
 <body >
@@ -33,7 +35,7 @@
                         <h1 class="title">Comet IRC</h1>
                     </section>
 
-                    <a class="left tab-bar-section" href="#" core-drawer-toggle>
+                    <a class="left tab-bar-section" href="#">
                         <h1 class="title">Channels</h1>
                     </a>
 
@@ -60,41 +62,17 @@
 
                 <section class="main-section">
                     <nav class="top-bar">
-                        <section class="top-bar-section">
-                            {{#if currentUser}}
-                                <!-- Left Nav Section -->
-                                <ul class="left">
-                                    <li><a href="#" class="bold" data-reveal-id="connectModal">Connect to a
-                                        Server</a></li>
-                                </ul>
-
-                                <!-- Right Nav Section -->
-                                <ul class="right">
-                                    <li class=""><a id="logout" href="#">Logout</a></li>
-                                    <li class=""><a href="#">Settings</a></li>
-                                </ul>
-
-                            {{else}}
-                                <ul class="right">
-                                    <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login /
-                                        Sign up</a></li>
-                                </ul>
-
-                            {{/if}}
-
-                        </section>
+                        <div>{{> navbar}}</div>
                     </nav>
 
                     <main>
-                        <div id="connectModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle"
-                             aria-hidden="true" role="dialog">
+                        <paper-dialog id="connectModal" heading="Connect" transition="core-transition-center">
                             {{> serverconnect}}
-                        </div>
+                        </paper-dialog>
 
-                        <div id="loginModal" class="reveal-modal small" data-reveal aria-labelledby="modalTitle"
-                             aria-hidden="true" role="dialog">
+                        <paper-dialog id="loginModal" heading="Login or Sign up" transition="core-transition-center">
                             {{> loginform}}
-                        </div>
+                        </paper-dialog>
 
                         <div class="panel">
                             <div id="messages">
@@ -119,6 +97,31 @@
 
 
 </body>
+
+<template name="navbar">
+    <section class="top-bar-section">
+        {{#if currentUser}}
+            <!-- Left Nav Section -->
+            <ul class="left">
+                <li><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
+            </ul>
+
+            <!-- Right Nav Section -->
+            <ul class="right">
+                <li class=""><a id="logout" href="#">Logout</a></li>
+                <li class=""><a href="#">Settings</a></li>
+            </ul>
+
+        {{else}}
+            <ul class="right">
+                <li class=""><a href="#" id="loginModalLink">Login /
+                    Sign up</a></li>
+            </ul>
+
+        {{/if}}
+
+    </section>
+</template>
 
 <template name="message">
     {{#if action}}
@@ -167,10 +170,10 @@
         <label for="channel">Channel</label>
         <input id="channel" type="text" class="validate">
 
-        <div class="button-group round">
+        <div class="button-group">
             <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect
             </button>
-            <button aria-label="Close" class="button half-width secondary">Cancel</button>
+            <paper-button id="cancelButton" affirmative class="button half-width secondary floatright">Cancel</paper-button>
         </div>
     </form>
 

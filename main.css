@@ -124,6 +124,14 @@ main {
     background-color: #333;
 }
 
+.floatright {
+    float: right;
+}
+
+paper-button .button-content {
+    padding: 0rem;
+}
+
 @media only screen and (min-width: 150px) and (max-width: 650px){
     .top-bar-section ul {
         width: auto;
