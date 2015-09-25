@@ -121,12 +121,12 @@ if (Meteor.isClient) {
             var json = {
                 channel: Session.get("currChannel"),
                 server: Session.get("currServer"),
-                message: event.target.irc_msg.value,
+                message: t.find("#msginput").value,
             };
 
             Meteor.call("sendMessage", json);
 
-            event.target.irc_msg.value = "";
+            t.find("#msginput").value = "";
         }
     });
 
