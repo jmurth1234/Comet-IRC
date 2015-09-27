@@ -16,7 +16,12 @@
     <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
     <link rel="import" href="bower_components/paper-button/paper-button.html">
     <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
-    <link rel="import" href="bower_components/core-list/core-list.html">
+    <link rel="import" href="bower_components/core-menu-button/core-menu-button.html">
+
+    <link href="bower_components/core-dropdown/core-dropdown.html" rel="import">
+    <link href="bower_components/core-item/core-item.html" rel="import">
+    <link href="bower_components/core-menu/core-menu.html" rel="import">
+
 </head>
 
 <body >
@@ -55,6 +60,8 @@
         </paper-dialog>
 
 
+
+
         <div class="panel" id="messages">
             <div data-alert class="alert-box secondary">
                 <button class="button tiny" id="loadmore">Load more scrollback.</button>
@@ -85,7 +92,16 @@
 
                 <!-- Right Nav Section -->
                 <ul class="right">
-                    <li class="inline"><core-icon-button icon="social:people"></core-icon-button></li>
+                    <core-menu-button>
+                        <core-icon-button icon="social:people"></core-icon-button>
+                        <core-dropdown layered class="dropdown">
+                            <core-menu>
+                                <core-item class="bold">Users</core-item>
+                                {{#each users}} {{> user}} {{/each}}
+
+                            </core-menu>
+                        </core-dropdown>
+                    </core-menu-button>
                     <li class="inline"><a id="logout" href="#">Logout</a></li>
                 </ul>
 
@@ -105,7 +121,7 @@
 
 <template name="message">
     {{#if action}}
-        <li class="message">[{{time}}]<span style="font-style: italic; color: #555;"> * {{handle}} {{{text}}}</span></li>
+        <li class="message">[{{time}}]<span style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></li>
     {{else}}
         <li class="message">[{{time}}] &lt;{{handle}}&gt; {{{text}}}</li>
     {{/if}}
@@ -130,7 +146,7 @@
 
 
 <template name="user">
-    <li><a href="#" id="{{server}}" class="channel">{{ircuser}}</a></li>
+    <core-item><a href="#" id="{{server}}">{{ircuser}}</a></core-item>
 </template>
 
 <template name="serverconnect">

@@ -151,6 +151,18 @@ paper-tabs {
     display: none !important;
 }
 
+core-dropdown {
+    right: 0px;
+    max-width: 200px !important;
+    width: 200px !important;
+    height: auto !important;
+    overflow: auto;
+}
+
+core-menu {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
 
 @media only screen and (min-width: 150px) and (max-width: 650px){
     .top-bar-section ul {

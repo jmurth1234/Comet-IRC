@@ -45,6 +45,14 @@ if (Meteor.isClient) {
         }
     });
 
+
+    Template.navbar.helpers({
+        users: function() {
+            return IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser: 1}});
+        },
+    });
+
+
     Template.body.helpers({
         messages: function() {
             var list = [];
@@ -62,11 +70,6 @@ if (Meteor.isClient) {
 
             return list.reverse();
         },
-
-        users: function() {
-            return IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser: 1}});
-        },
-
 
         channels: function() {
             var list = [];
