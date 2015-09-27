@@ -154,10 +154,14 @@ IRC.prototype.connect = function() {
                     //var addUsers = function (userList) {
                     Meteor.defer( function () {
                             userList.forEach(function (s) {
+                                var user_sorting = s.toLowerCase().replace("@", "").replace("+", "");
+                                var user_norank = s.replace("@", "").replace("+", "");
                                 IRCUsers.insert({
                                     channel: line.args[2],
                                     server: self.config.server_id,
                                     ircuser: s,
+                                    ircuser_norank: user_norank,
+                                    ircuser_sorting: user_sorting,
                                     user: self.config.user,
                                 });
                             })

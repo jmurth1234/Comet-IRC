@@ -48,7 +48,22 @@ if (Meteor.isClient) {
 
     Template.navbar.helpers({
         users: function() {
-            return IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser: 1}});
+            var users = [];
+            var voiced = [];
+            var opped = [];
+            var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+
+            list.forEach(function (user) {
+                if (user.ircuser.startsWith("@")) {
+                    opped.push(user);
+                } else if (user.ircuser.startsWith("+")) {
+                    voiced.push(user);
+                } else {
+                    users.push(user);
+                }
+            });
+
+            return opped.concat(voiced).concat(users);
         },
     });
 
@@ -59,7 +74,6 @@ if (Meteor.isClient) {
             var messages =  IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: -1}, transform: function(doc) {
                 if(doc.text) {
                     doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
-                    console.log(doc.text);
                 }
                 return doc;
             }});
@@ -92,6 +106,24 @@ if (Meteor.isClient) {
     Template.channelmsg.rendered = function () {
         if (Meteor.Device.isPhone())
             jQuery("#msginput").attr("autocomplete", "on");
+
+        jQuery(".channelmsg").on('keydown', '#msginput', function(e) {
+            var input = document.getElementById('msginput');
+
+            var keyCode = e.keyCode || e.which;
+
+            if (keyCode == 9) {
+                e.preventDefault();
+
+                var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+
+                list.forEach(function (user) {
+                    if (user.ircuser_norank.startsWith(input.value)) {
+                        input.value = user.ircuser_norank + ": ";
+                    }
+                });
+            }
+        });
     }
 
     Template.serverconnect.events({
@@ -133,6 +165,16 @@ if (Meteor.isClient) {
             Meteor.call("sendMessage", json);
 
             t.find("#msginput").value = "";
+        },
+        "click #tabbutton": function (e) {
+            var input = document.getElementById('msginput');
+            var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+
+            list.forEach(function (user) {
+                if (user.ircuser_norank.startsWith(input.value)) {
+                    input.value = user.ircuser_norank + ": ";
+                }
+            });
         }
     });
 
