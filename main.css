@@ -1,6 +1,6 @@
-@import url(http://fonts.googleapis.com/css?family=Roboto:400,300,700,500);
+@import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,700);
 body {
-    font-family: Roboto, sans-serif !important;
+    font-family: 'Open Sans', sans-serif !important;
 }
 
 body {
@@ -25,7 +25,7 @@ body {
     margin-bottom: 0px;
     flex-flow: column;
     padding: 0.25rem;
-    max-width: 100%;
+    width: 100%;
 }
 
 .channelmsg{
@@ -112,6 +112,7 @@ paper-tabs {
 
 .channel {
     color: #fff !important;
+    font-size: 16px !important;
 }
 
 paper-tabs.transparent-teal::shadow #selectionBar {
@@ -131,11 +132,16 @@ core-icon-button {
     margin: 0px;
 }
 
+.message {
+    color: #000 !important;
+    font-size: 14px;
+}
+
 .inline {
     display: inline-block;
 }
 
-paper-button  .button-content{
+paper-button  .button-content {
     margin: 0;
     padding: 0;
 }

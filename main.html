@@ -12,6 +12,7 @@
     <link rel="import" href="bower_components/core-icon/core-icon.html">
     <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
     <link rel="import" href="bower_components/core-icons/core-icons.html">
+    <link rel="import" href="bower_components/core-icons/social-icons.html">
     <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
     <link rel="import" href="bower_components/paper-button/paper-button.html">
     <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
@@ -84,7 +85,8 @@
 
                 <!-- Right Nav Section -->
                 <ul class="right">
-                    <li class=""><a id="logout" href="#">Logout</a></li>
+                    <li class="inline"><core-icon-button icon="social:people"></core-icon-button></li>
+                    <li class="inline"><a id="logout" href="#">Logout</a></li>
                 </ul>
 
             {{else}}
@@ -103,7 +105,7 @@
 
 <template name="message">
     {{#if action}}
-        <li class="message">[{{time}}]<span style="font-style: italic;"> * {{handle}} {{{text}}}</span></li>
+        <li class="message">[{{time}}]<span style="font-style: italic; color: #555;"> * {{handle}} {{{text}}}</span></li>
     {{else}}
         <li class="message">[{{time}}] &lt;{{handle}}&gt; {{{text}}}</li>
     {{/if}}
