@@ -1,8 +1,4 @@
 if (Meteor.isClient) {
-    Router.route('/', function () {
-      this.render('home');
-    });
-
     var ITEMS_INCREMENT = 200;
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));

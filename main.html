@@ -17,7 +17,7 @@
 
             <div class="nav">
                 {{> navbar}}
-                <paper-tabs link scrollable>
+                <paper-tabs scrollable>
                     {{#each channels}} {{> channeltab}} {{/each}}
                 </paper-tabs>
             </div>
@@ -59,22 +59,19 @@
             {{#if currentUser}}
                 <!-- Left Nav Section -->
                 <ul class="left">
-                    <li class="inline"><paper-icon-button core-drawer-toggle icon="icons:menu"></paper-icon-button></li>
+                    <li class="inline"><paper-icon-button paper-drawer-toggle icon="icons:menu"></paper-icon-button></li>
                     <li class="inline"><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
                 </ul>
 
                 <!-- Right Nav Section -->
                 <ul class="right">
-                    <core-menu-button>
-                        <paper-icon-button icon="social:people"></paper-icon-button>
-                        <core-dropdown layered class="dropdown">
-                            <core-menu>
-                                <core-item class="bold">Users</core-item>
-                                {{#each users}} {{> user}} {{/each}}
-
-                            </core-menu>
-                        </core-dropdown>
-                    </core-menu-button>
+                    <paper-menu-button>
+                        <paper-icon-button icon="social:people" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
+                        <paper-menu class="dropdown-content">
+                            <paper-item class="bold">Users</paper-item>
+                            {{#each users}} {{> user}} {{/each}}
+                        </paper-menu>
+                    </paper-menu-button>
 
                     {{#if hasNotifications}}
                     <core-menu-button>
@@ -127,15 +124,15 @@
 
 <template name="channeltab">
     {{#if title}}
-        <paper-tab noink><a horizontal center-center layout>{{name}}</a></paper-tab>
+        <paper-tab horizontal center-center layout>{{name}}</paper-tab>
     {{else}}
-        <paper-tab noink><a href="#" id="{{server_id}}" class="channel" horizontal center-center layout>{{name}}</a></paper-tab>
+        <paper-tab ink id="{{server_id}}" class="channel" horizontal center-center layout>{{name}}</paper-tab>
     {{/if}}
 </template>
 
 
 <template name="user">
-    <core-item><a href="#" id="{{server}}">{{ircuser}}</a></core-item>
+    <paper-item><a href="#" id="{{server}}">{{ircuser}}</a></paper-item>
 </template>
 
 <template name="serverconnect">

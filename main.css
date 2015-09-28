@@ -151,15 +151,13 @@ paper-tabs {
     display: none !important;
 }
 
-core-dropdown {
-    right: 0px;
+iron-dropdown {
+    right: 0px !important;
+    left: auto !important;
     max-width: 200px !important;
     width: 200px !important;
     height: auto !important;
     overflow: auto;
-}
-
-core-menu {
     margin-top: 0px;
     margin-bottom: 0px;
 }
@@ -172,6 +170,19 @@ paper-dialog {
 
 paper-toast {
     background-color: #444;
+}
+
+paper-menu-button {
+    padding: 8px;
+}
+
+paper-icon-button {
+    padding: 0px;
+}
+
+paper-material {
+    max-width: 200px;
+    overflow: auto;
 }
 
 @media only screen and (min-width: 150px) and (max-width: 650px){
