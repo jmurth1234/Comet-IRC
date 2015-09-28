@@ -123,7 +123,7 @@ paper-tabs.transparent-teal::shadow #selectionBar {
     float: right;
 }
 
-core-icon-button {
+paper-icon-button {
     color: #fff;
 }
 
@@ -162,6 +162,16 @@ core-dropdown {
 core-menu {
     margin-top: 0px;
     margin-bottom: 0px;
+}
+
+paper-dialog {
+    padding-left: 24px;
+    padding-right: 24px;
+    min-width: 300px;
+}
+
+paper-toast {
+    background-color: #444;
 }
 
 @media only screen and (min-width: 150px) and (max-width: 650px){

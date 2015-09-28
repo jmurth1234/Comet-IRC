@@ -1,4 +1,8 @@
 if (Meteor.isClient) {
+    Router.route('/', function () {
+      this.render('home');
+    });
+
     var ITEMS_INCREMENT = 200;
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
@@ -11,6 +15,7 @@ if (Meteor.isClient) {
 
     Template.body.events({
         "click #loadmore": function(event) {
+            var channel = Session.get("currChannel");
             Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT );
             Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
         },
@@ -65,6 +70,9 @@ if (Meteor.isClient) {
 
             return opped.concat(voiced).concat(users);
         },
+        hasNotifications: function () {
+            return false;
+        }
     });
 
 
@@ -190,17 +198,10 @@ if (Meteor.isClient) {
             // Meteor.loginWithPassword() function.
             Meteor.loginWithPassword(username, password, function(err) {
                 if (!err) {
-                    swal({
-                        title: "Login success!",
-                        type: "success"
-                    }, function() {
-                        $('#loginModal').foundation('reveal', 'close');
-                    });
+                    document.getElementById('loginSuccess').show();
+                    document.getElementById('loginModal').toggle();
                 } else {
-                    swal({
-                        title: "Login failed!",
-                        type: "warning"
-                    });
+                    document.getElementById('loginFailure').show();
                 }
             });
             return false;
@@ -221,17 +222,10 @@ if (Meteor.isClient) {
                 password: password
             }, function(err) {
                 if (!err) {
-                    swal({
-                        title: "Registration succeeded!",
-                        type: "success"
-                    }, function() {
-                        $('#loginModal').foundation('reveal', 'close');
-                    });
+                    document.getElementById('registerSuccess').show();
+                    document.getElementById('loginModal').toggle();
                 } else {
-                    swal({
-                        title: "Registration failed!",
-                        type: "warning"
-                    });
+                    document.getElementById('registerFailure').show();
                 }
             });
             return false;

@@ -4,80 +4,53 @@
 
     <meta name="mobile-web-app-capable" content="yes"/>
 
-    <!--Let browser know website is optimized for mobile-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"/>
-
-    <link rel="import" href="bower_components/polymer/polymer.html">
-    <link rel="import" href="bower_components/core-drawer-panel/core-drawer-panel.html">
-    <link rel="import" href="bower_components/core-icon/core-icon.html">
-    <link rel="import" href="bower_components/core-icon-button/core-icon-button.html">
-    <link rel="import" href="bower_components/core-icons/core-icons.html">
-    <link rel="import" href="bower_components/core-icons/social-icons.html">
-    <link rel="import" href="bower_components/paper-dialog/paper-dialog.html">
-    <link rel="import" href="bower_components/paper-button/paper-button.html">
-    <link rel="import" href="bower_components/paper-tabs/paper-tabs.html">
-    <link rel="import" href="bower_components/core-menu-button/core-menu-button.html">
-
-    <link href="bower_components/core-dropdown/core-dropdown.html" rel="import">
-    <link href="bower_components/core-item/core-item.html" rel="import">
-    <link href="bower_components/core-menu/core-menu.html" rel="import">
-
 </head>
 
-<body >
-
-<core-drawer-panel>
-    <div drawer>
-        <ul class="off-canvas-list">
-            {{#each channels}} {{> channel}} {{/each}}
-        </ul>
-    </div>
-    <div main>
-        <!--   Old users list
-        <aside class="right-off-canvas-menu">
+<body>
+    <paper-drawer-panel>
+        <div drawer>
             <ul class="off-canvas-list">
-                <li>
-                    <label>Users</label>
-                </li>
-                {{#each users}} {{> user}} {{/each}}
-
+                {{#each channels}} {{> channel}} {{/each}}
             </ul>
-        </aside> -->
-
-        <div class="nav">
-            {{> navbar}}
-            <paper-tabs link scrollable>
-                {{#each channels}} {{> channeltab}} {{/each}}
-            </paper-tabs>
         </div>
+        <div main>
 
-        <paper-dialog id="connectModal" class="small" heading="Connect" transition="core-transition-center">
-            {{> serverconnect}}
-        </paper-dialog>
-
-        <paper-dialog id="loginModal" class="small" heading="Login or Sign up" transition="core-transition-center">
-            {{> loginform}}
-        </paper-dialog>
-
-
-
-
-        <div class="panel" id="messages">
-            <div data-alert class="alert-box secondary">
-                <button class="button tiny" id="loadmore">Load more scrollback.</button>
+            <div class="nav">
+                {{> navbar}}
+                <paper-tabs link scrollable>
+                    {{#each channels}} {{> channeltab}} {{/each}}
+                </paper-tabs>
             </div>
-            <ul class="messages">
-                {{#each messages}} {{> message}} {{/each}}
-            </ul>
+
+            <paper-dialog id="connectModal" class="small" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation">
+                {{> serverconnect}}
+            </paper-dialog>
+
+            <paper-dialog id="loginModal" class="small" entry-animation="scale-up-animation"
+                  exit-animation="fade-out-animation">
+                {{> loginform}}
+            </paper-dialog>
+
+            <div class="panel" id="messages">
+                <div data-alert class="alert-box secondary">
+                    <button class="button tiny" id="loadmore">Load more scrollback.</button>
+                </div>
+                <ul class="messages">
+                    {{#each messages}} {{> message}} {{/each}}
+                </ul>
+            </div>
+
+
+            {{> channelmsg}}
+
         </div>
+    </paper-drawer-panel>
 
-
-        {{> channelmsg}}
-
-    </div>
-</core-drawer-panel>
-
-
+    <paper-toast id="loginSuccess" text="Logged in successfully!"></paper-toast>
+    <paper-toast id="loginFailure" text="Failed to login"></paper-toast>
+    <paper-toast id="registerSuccess" text="Registered successfully!."></paper-toast>
+    <paper-toast id="registerFailure" text="Failed to register"></paper-toast>
 </body>
 
 <template name="navbar">
@@ -86,14 +59,14 @@
             {{#if currentUser}}
                 <!-- Left Nav Section -->
                 <ul class="left">
-                    <li class="inline"><core-icon-button core-drawer-toggle icon="menu"></core-icon-button></li>
+                    <li class="inline"><paper-icon-button core-drawer-toggle icon="icons:menu"></paper-icon-button></li>
                     <li class="inline"><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
                 </ul>
 
                 <!-- Right Nav Section -->
                 <ul class="right">
                     <core-menu-button>
-                        <core-icon-button icon="social:people"></core-icon-button>
+                        <paper-icon-button icon="social:people"></paper-icon-button>
                         <core-dropdown layered class="dropdown">
                             <core-menu>
                                 <core-item class="bold">Users</core-item>
@@ -102,6 +75,22 @@
                             </core-menu>
                         </core-dropdown>
                     </core-menu-button>
+
+                    {{#if hasNotifications}}
+                    <core-menu-button>
+                        <paper-icon-button icon="social:notifications"></paper-icon-button>
+                        <core-dropdown layered class="dropdown">
+                            <core-menu>
+                                <core-item class="bold">Notifications</core-item>
+                                {{#each users}} {{> user}} {{/each}}
+
+                            </core-menu>
+                        </core-dropdown>
+                    </core-menu-button>
+                    {{else}}
+                    <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+                    {{/if}}
+
                     <li class="inline"><a id="logout" href="#">Logout</a></li>
                 </ul>
 
@@ -150,37 +139,39 @@
 </template>
 
 <template name="serverconnect">
-    <form id="connect-form">
-        <label for="irc_server_name">Server Name (Optional)</label>
-        <input id="irc_server_name" type="text" class="validate">
+    <h2>Connect to a Server</h2>
+    <div>
+        <form id="connect-form">
+            <label for="irc_server_name">Server Name (Optional)</label>
+            <input id="irc_server_name" type="text" class="validate">
 
-        <div class="row collapse">
-            <div class="small-9 large-10 columns">
-                <label for="irc_server">IRC Server</label>
-                <input id="irc_server" type="text" placeholder="Hostname or IP">
+            <div class="row collapse">
+                <div class="small-9 large-10 columns">
+                    <label for="irc_server">IRC Server</label>
+                    <input id="irc_server" type="text" placeholder="Hostname or IP">
+                </div>
+                <div class="small-3 large-2 columns">
+                    <label for="irc_port" style="color: #fff">.</label>
+                    <input type="text" class="postfix" id="irc_port" placeholder="Port">
+                </div>
             </div>
-            <div class="small-3 large-2 columns">
-                <label for="irc_port" style="color: #fff">.</label>
-                <input type="text" class="postfix" id="irc_port" placeholder="Port">
+
+            <label for="irc_nick">Nickname</label>
+            <input id="irc_nick" type="text" class="validate">
+
+            <label for="irc_password">IRC Password</label>
+            <input id="irc_password" type="password" class="validate">
+
+            <label for="channel">Channel</label>
+            <input id="channel" type="text" class="validate">
+
+            <div class="button-group">
+                <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect
+                </button>
+                <paper-button id="cancelButton" affirmative class="button half-width secondary floatright">Cancel</paper-button>
             </div>
-        </div>
-
-        <label for="irc_nick">Nickname</label>
-        <input id="irc_nick" type="text" class="validate">
-
-        <label for="irc_password">IRC Password</label>
-        <input id="irc_password" type="password" class="validate">
-
-        <label for="channel">Channel</label>
-        <input id="channel" type="text" class="validate">
-
-        <div class="button-group">
-            <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect
-            </button>
-            <paper-button id="cancelButton" affirmative class="button half-width secondary floatright">Cancel</paper-button>
-        </div>
-    </form>
-
+        </form>
+    </div>
 </template>
 
 <template name="loginform">
@@ -210,7 +201,7 @@
                            placeholder="Message">
                 </div>
                 <div class="small-1 columns">
-                    <a id="tabbutton" class="nomargin button postfix"><core-icon icon="search"></core-icon></a>
+                    <a id="tabbutton" class="nomargin button postfix"><iron-icon icon="icons:search"></iron-icon></a>
                 </div>
                 <div class="small-1 columns">
                     <button type="submit" name="action" class="nomargin button postfix">Send</button>

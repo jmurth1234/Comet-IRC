@@ -25,5 +25,5 @@ ejson
 spacebars
 check
 crosswalk
-ecwyne:polymer-elements
-differential:vulcanize
+iron:router
+loneleeandroo:polymerize
