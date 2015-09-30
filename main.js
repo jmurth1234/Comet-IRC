@@ -3,6 +3,7 @@ if (Meteor.isClient) {
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
     Meteor.subscribe("IRCChannels");
+    Meteor.subscribe("IRCPings");
     Meteor.subscribe("IRCConnections");
 
     serverMessages.listen('serverMessage:' + Meteor.userId(), function (title, message) {
@@ -70,7 +71,10 @@ if (Meteor.isClient) {
             return Session.get("loaded");
         },
         hasNotifications: function () {
-            return true;
+            return (IRCPings.find({}, {sort: {date_time: -1}}).length != 0);
+        },
+        notifications: function () {
+            return IRCPings.find({}, {sort: {date_time: -1}});
         }
     });
 
@@ -322,6 +326,12 @@ if (Meteor.isServer) {
 
     Meteor.publish("IRCChannels", function() {
         return IRCChannels.find({
+            user: this.userId
+        });
+    });
+
+    Meteor.publish("IRCPings", function() {
+        return IRCPings.find({
             user: this.userId
         });
     });

@@ -77,16 +77,16 @@
                         </paper-menu-button>
 
                         {{#if hasNotifications}}
-                        <paper-menu-button>
-                            <paper-icon-button icon="social:notifications" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                            <paper-menu class="dropdown-content">
-                                <paper-item class="bold">Notifications</paper-item>
-                                {{#each users}} {{> user}} {{/each}}
+                            <paper-menu-button>
+                                <paper-icon-button icon="social:notifications" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
+                                <paper-menu class="dropdown-content">
+                                    <paper-item class="bold">Notifications</paper-item>
+                                    {{#each notifications}} {{> notification}} {{/each}}
 
-                            </paper-menu>
-                        </paper-menu-button>
+                                </paper-menu>
+                            </paper-menu-button>
                         {{else}}
-                        <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+                            <paper-icon-button icon="social:notifications-none"></paper-icon-button>
                         {{/if}}
                     {{/if}}
 
@@ -135,6 +135,19 @@
 
 <template name="user">
     <paper-item><a href="#" id="{{server}}">{{ircuser}}</a></paper-item>
+</template>
+
+<template name="notification">
+<paper-item>
+    <paper-item-body two-line>
+        <div>Mentioned by {{handle}} in {{channel}}</div>
+        {{#if action}}
+            <div secondary> class="message">[{{time}}]<span style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></div>
+        {{else}}
+            <div secondary>&lt;{{handle}}&gt; {{{text}}}</div>
+        {{/if}}
+    </paper-item-body>
+</paper-item>
 </template>
 
 <template name="serverconnect">

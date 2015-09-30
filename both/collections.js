@@ -6,5 +6,8 @@ IRCUsers = new Mongo.Collection('ircUsers');
 IRCConnections = new Mongo.Collection('ircConnections');
 IRCLinks = new Mongo.Collection('ircLinks');
 
+IRCPings = new Mongo.Collection('ircPings');
+
+
 serverMessages = new ServerMessages();
 

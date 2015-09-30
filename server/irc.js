@@ -98,7 +98,17 @@ IRC.prototype.connect = function() {
 
                     if (text.indexOf(self.config.nick) !== -1) {
                         console.log("mentioned!")
-                        serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel, text);
+                        serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel + " by " + handle, text);
+
+                        IRCPings.insert({
+                            handle: handle,
+                            channel: channel,
+                            server: self.config.server_id,
+                            text: escapeHtml(text),
+                            date_time: date || new Date(),
+                            action: action,
+                            user: self.config.user
+                        });
                     }
 
                     addMessageToDb(self, channel, handle, text, action, date);
@@ -109,7 +119,7 @@ IRC.prototype.connect = function() {
                             channel: channel,
                             server: self.config.server_id,
                             sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                            user: self.config.user,
+                            user: self.config.user
                         });
                     }
 
