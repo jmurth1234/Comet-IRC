@@ -151,7 +151,7 @@ paper-tabs {
     display: none !important;
 }
 
-iron-dropdown {
+iron-dropdown, paper-menu {
     right: 0px !important;
     left: auto !important;
     max-width: 200px !important;
@@ -183,6 +183,10 @@ paper-icon-button {
 paper-material {
     max-width: 200px;
     overflow: auto;
+}
+
+paper-item .bold {
+    background-color: #CCCCCC;
 }
 
 @media only screen and (min-width: 150px) and (max-width: 650px){

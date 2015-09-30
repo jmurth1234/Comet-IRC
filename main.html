@@ -65,27 +65,27 @@
 
                 <!-- Right Nav Section -->
                 <ul class="right">
-                    <paper-menu-button>
-                        <paper-icon-button icon="social:people" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                        <paper-menu class="dropdown-content">
-                            <paper-item class="bold">Users</paper-item>
-                            {{#each users}} {{> user}} {{/each}}
-                        </paper-menu>
-                    </paper-menu-button>
+                    {{#if isLoaded}}
+                        <paper-menu-button>
+                            <paper-icon-button icon="social:people" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
+                            <paper-menu class="dropdown-content">
+                                <paper-item class="bold">Users</paper-item>
+                                {{#each users}} {{> user}} {{/each}}
+                            </paper-menu>
+                        </paper-menu-button>
 
-                    {{#if hasNotifications}}
-                    <core-menu-button>
-                        <paper-icon-button icon="social:notifications"></paper-icon-button>
-                        <core-dropdown layered class="dropdown">
-                            <core-menu>
-                                <core-item class="bold">Notifications</core-item>
+                        {{#if hasNotifications}}
+                        <paper-menu-button>
+                            <paper-icon-button icon="social:notifications" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
+                            <paper-menu class="dropdown-content">
+                                <paper-item class="bold">Notifications</paper-item>
                                 {{#each users}} {{> user}} {{/each}}
 
-                            </core-menu>
-                        </core-dropdown>
-                    </core-menu-button>
-                    {{else}}
-                    <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+                            </paper-menu>
+                        </paper-menu-button>
+                        {{else}}
+                        <paper-icon-button icon="social:notifications-none"></paper-icon-button>
+                        {{/if}}
                     {{/if}}
 
                     <li class="inline"><a id="logout" href="#">Logout</a></li>

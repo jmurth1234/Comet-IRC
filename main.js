@@ -66,8 +66,11 @@ if (Meteor.isClient) {
 
             return opped.concat(voiced).concat(users);
         },
+        isLoaded: function () {
+            return Session.get("loaded");
+        },
         hasNotifications: function () {
-            return false;
+            return true;
         }
     });
 
@@ -230,13 +233,8 @@ if (Meteor.isClient) {
 
 
     Template.body.rendered = function() {
-        console.log("loaded");
         var vph = jQuery(window).height();
         jQuery(".panel").height(vph - 95);
-
-        if (!Meteor.userId()) {
-            document.getElementById('loginModal').toggle();
-        }
 
         jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function() {
             var modal = jQuery(this);
@@ -248,6 +246,20 @@ if (Meteor.isClient) {
                 }
             }
         });
+
+        Session.set("loaded", false);
+
+        // shitty workaround
+        setTimeout(function () {
+            console.log("loaded");
+
+            if (!Meteor.userId()) {
+                document.getElementById('loginModal').toggle();
+            }
+
+            Session.set("loaded", true);
+
+        }, 2000);
 
     }
 

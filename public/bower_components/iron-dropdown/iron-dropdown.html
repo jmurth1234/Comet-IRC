@@ -46,7 +46,15 @@ method is called on the element.
 <dom-module id="iron-dropdown">
   <style>
     :host {
-      position: fixed;
+        position: fixed;
+
+        right: 0px !important;
+        left: auto !important;
+        max-width: 200px !important;
+        width: 200px !important;
+        height: auto !important;
+        margin-top: 0px;
+        margin-bottom: 0px;
     }
 
     #contentWrapper ::content > * {
