@@ -179,6 +179,12 @@ paper-item .bold {
     background-color: #CCCCCC;
 }
 
+.dropdown-content-li {
+    float: none !important;
+    max-width: 200px;
+
+}
+
 @media only screen and (min-width: 150px) and (max-width: 650px){
     .top-bar-section ul {
         width: auto;

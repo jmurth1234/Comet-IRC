@@ -70,10 +70,11 @@
                     {{#if isLoaded}}
                         <paper-menu-button>
                             <paper-icon-button icon="social:people" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                            <paper-menu class="dropdown-content">
-                                <paper-item class="bold">Users</paper-item>
+                            <ul class="dropdown-content">
+                                <li class="dropdown-content-li"><a class="bold">Users</a></li>
                                 {{#each users}} {{> user}} {{/each}}
-                            </paper-menu>
+                            </ul>
+
                         </paper-menu-button>
 
                         {{#if hasNotifications}}
@@ -134,7 +135,7 @@
 
 
 <template name="user">
-    <paper-item><a href="#" id="{{server}}">{{ircuser}}</a></paper-item>
+    <li class="dropdown-content-li"><a href="#" id="{{server}}">{{ircuser}}</a></li>
 </template>
 
 <template name="notification">

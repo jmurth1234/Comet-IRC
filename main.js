@@ -53,9 +53,10 @@ if (Meteor.isClient) {
             var users = [];
             var voiced = [];
             var opped = [];
-            var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+            var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}}).fetch();
 
-            list.forEach(function (user) {
+            for (i = 0; i < list.length; i++) {
+                var user = list[i];
                 if (user.ircuser.startsWith("@")) {
                     opped.push(user);
                 } else if (user.ircuser.startsWith("+")) {
@@ -63,7 +64,7 @@ if (Meteor.isClient) {
                 } else {
                     users.push(user);
                 }
-            });
+            }
 
             return opped.concat(voiced).concat(users);
         },
@@ -87,11 +88,12 @@ if (Meteor.isClient) {
                     doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
                 }
                 return doc;
-            }});
+            }}).fetch();
 
-            messages.forEach(function (message) {
+            for (i = 0; i < messages.length; i++) {
+                var message = messages[i];
                 list.push(message);
-            });
+            }
 
             return list.reverse();
         },
