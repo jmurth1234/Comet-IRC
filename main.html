@@ -34,6 +34,12 @@
                 {{> loginform}}
             </paper-dialog>
 
+            <paper-dialog id="imageitModal" class="small" entry-animation="scale-up-animation"
+                          exit-animation="fade-out-animation">
+                {{> imageit}}
+            </paper-dialog>
+
+
             <div class="panel" id="messages">
                 <div data-alert class="alert-box secondary">
                     <button class="button tiny" id="loadmore">Load more scrollback.</button>
@@ -80,11 +86,19 @@
                         {{#if hasNotifications}}
                             <paper-menu-button>
                                 <paper-icon-button icon="social:notifications" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                                <paper-menu class="dropdown-content">
-                                    <paper-item class="bold">Notifications</paper-item>
-                                    {{#each notifications}} {{> notification}} {{/each}}
+                                <ul class="dropdown-content notifications">
+                                    <li class="dropdown-content-li">
+                                        <a class="bold">
+                                            <paper-item>
+                                                <paper-item-body>
+                                                    <div>Notifications: {{notificationsCount}}</div>
+                                                </paper-item-body>
+                                            </paper-item>
+                                        </a>
+                                    </li>
+                                    {{#each notifications}}<li class="dropdown-content-li"><a>{{> notification}}</a></li>{{/each}}
 
-                                </paper-menu>
+                                </ul>
                             </paper-menu-button>
                         {{else}}
                             <paper-icon-button icon="social:notifications-none"></paper-icon-button>
@@ -209,17 +223,34 @@
     <form class="channelmsg">
         <div class="large-12 columns">
             <div class="row collapse">
+                <div class="small-1 columns">
+                    <a id="tabbutton" class="nomargin button prefix"><iron-icon icon="icons:search"></iron-icon></a>
+                </div>
                 <div class="small-10 columns">
                     <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin"
                            placeholder="Message">
                 </div>
                 <div class="small-1 columns">
-                    <a id="tabbutton" class="nomargin button postfix"><iron-icon icon="icons:search"></iron-icon></a>
+                    <a id="addbutton" class="nomargin button postfix"><iron-icon icon="icons:add"></iron-icon></a>
                 </div>
-                <div class="small-1 columns">
-                    <button type="submit" name="action" class="nomargin button postfix">Send</button>
-                </div>
+
             </div>
         </div>
     </form>
+</template>
+
+<template name="imageit">
+    <div id="imageit-wrapper">
+        <div id="content">
+            <p>Using Chrome, IE11 or Firefox? Just use Ctrl-V in the below box to paste most images straight onto ImageIT!</p>
+            <div id="paste" contenteditable="">
+            </div>
+            <p>Not working? Just click the button, and we'll let you choose any image on your PC, phone or tablet.</p>
+            <div>
+                <form action="/" id="imgUpload" method="post" class="add-entry" enctype="multipart/form-data">
+                    <input id="fileInput" name="fileInput" type="file">
+                </form>
+            </div>
+        </div>
+    </div>
 </template>
