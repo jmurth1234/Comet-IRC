@@ -170,8 +170,6 @@ if (Meteor.isClient) {
                 channel: t.find("#channel").value
             };
 
-            console.log(json);
-
             Meteor.call("connectServer", json);
 
             document.getElementById('connectModal').toggle();
@@ -300,27 +298,17 @@ if (Meteor.isClient) {
 
     Template.imageit.rendered = function () {
         document.getElementById('fileInput').addEventListener('change', submitForm);
-        document.getElementById('imgUpload').addEventListener('submit', onSubmit);
         document.getElementById('paste').addEventListener('paste', handlePaste);
         var msgInput = document.getElementById('msginput');
 
         function submitForm() {
-            input = document.getElementById('submit');
-            if (input) {
-                input.click();
-            }
-        }
-
-        function onSubmit(e) {
             console.log("caught it");
-            if (e.preventDefault) e.preventDefault();
             var uploader = document.getElementById('fileInput');
             if (uploader.files.length == 0) {
-                return false;
+                return;
             } else {
                 uploadFile(uploader.files[0]);
             }
-            return false;
         }
 
         // Minified version of isMobile
@@ -465,7 +453,6 @@ if (Meteor.isClient) {
                         console.log("window is avaliable");
                     }
                     console.log( "Window.location is " + top.window.location);
-                    addUploadedImage(xhr.response);
                     //top.window.location.href = " + xhr.response;
                     msgInput.value = msgInput.value + "http://images.rymate.co.uk/view/" + xhr.response;
                 } else if (xhr.status == 413) {

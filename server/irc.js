@@ -290,7 +290,6 @@ IRC.prototype.send = function(command) {
 
     if (this.connection) {
         this.connection.write(args.join(" ") + "\r\n");
-        if (this.config.debug) console.log(args);
     }
 };
 
