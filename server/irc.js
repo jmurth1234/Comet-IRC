@@ -65,6 +65,13 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
+            var debug = process.env.DEBUG;
+            if (typeof(debug) !== 'undefined') {
+                // FOO environment variables exists
+                if (debug == true) {
+                    console.log(line)
+                }
+            }
             switch (line.command) {
                 case "PING":
                     self.send("PONG", line.args[0]);
@@ -96,7 +103,8 @@ IRC.prototype.connect = function() {
                     if ("server_time" in line)
                         date = line.server_time;
 
-                    if (text.indexOf(self.config.nick) !== -1) {
+                    var highlighted = text.indexOf(self.config.nick) !== -1;
+                    if (highlighted) {
                         console.log("mentioned!")
                         serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel + " by " + handle, text);
 
@@ -205,9 +213,13 @@ IRC.prototype.connect = function() {
         if (self.config.debug) console.log('disconnected');
     })
 
-    function addMessageToDb(self, chan, user, message, action, date) {
+    function addMessageToDb(self, chan, user, message, action, date, highlighted) {
         if (date === undefined) {
             date = new Date();
+        }
+
+        if (highlighted === undefined) {
+            highlighted = false;
         }
 
         date = date || new Date();
@@ -222,12 +234,24 @@ IRC.prototype.connect = function() {
 
         currentTime += hours + ":" + minutes;
 
+        var cssClass = [];
+
+        if (highlighted) {
+            cssClass.push("highlight");
+        }
+
+        if (user === self.config.nick) {
+            cssClass.push("self");
+        }
+
+
         //insert irc message into db
         IRCMessages.insert({
             handle: user,
             channel: chan,
             server: self.config.server_id,
             text: escapeHtml(message),
+            css: cssClass.join(""),
             date_time: date,
             time: currentTime,
             action: action,
