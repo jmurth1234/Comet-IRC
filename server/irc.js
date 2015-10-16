@@ -65,8 +65,12 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
-            console.log(line);
-
+            if (typeof(debug) !== 'undefined') {
+                // FOO environment variables exists
+                if (debug == true) {
+                    console.log(line)
+                }
+            }
             switch (line.command) {
                 case "PING":
                     self.send("PONG", line.args[0]);
