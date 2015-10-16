@@ -65,6 +65,7 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
+            var debug = process.env.DEBUG;
             if (typeof(debug) !== 'undefined') {
                 // FOO environment variables exists
                 if (debug == true) {
