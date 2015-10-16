@@ -68,7 +68,7 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
-            console.log(line);
+            //console.log(line);
 
             switch (line.command) {
                 case "PING":
