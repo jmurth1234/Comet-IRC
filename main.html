@@ -42,7 +42,7 @@
 
             <div class="panel" id="messages">
                 <div data-alert class="alert-box secondary">
-                    <button class="button tiny" id="loadmore">Load more scrollback.</button>
+                    <button class="haeck primary tiny" id="loadmore">Load more scrollback.</button>
                 </div>
                 <ul class="messages">
                     {{#each messages}} {{> message}} {{/each}}
@@ -197,9 +197,9 @@
 
 
             <div class="button-group">
-                <button href="#!" aria-label="Close" type="submit" name="action" class="button half-width success">Connect
+                <button href="#!" aria-label="Close" type="submit" name="action" class="haeck success primary half-width">Connect
                 </button>
-                <paper-button id="cancelButton" affirmative class="button half-width secondary floatright">Cancel</paper-button>
+                <button id="cancelButton" class="haeck secondary half-width floatright">Cancel</button>
             </div>
         </form>
     </div>
@@ -217,8 +217,8 @@
         </div>
 
         <div class="button-group round">
-            <a href="#!" id="login" class="button half-width success">Login</a>
-            <a href="#!" id="signup" class="button half-width secondary">Sign Up</a>
+            <a href="#!" id="login" class="haeck success primary half-width">Login</a>
+            <a href="#!" id="signup" class="haeck half-width secondary floatright">Sign Up</a>
         </div>
     </form>
 </template>
@@ -228,14 +228,14 @@
         <div class="large-12 columns">
             <div class="row collapse">
                 <div class="small-1 columns">
-                    <a id="tabbutton" class="nomargin button prefix"><iron-icon icon="icons:search"></iron-icon></a>
+                    <a id="tabbutton" class="haeck primary nomargin button prefix"><iron-icon icon="icons:search"></iron-icon></a>
                 </div>
                 <div class="small-10 columns">
                     <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin"
                            placeholder="Message">
                 </div>
                 <div class="small-1 columns">
-                    <a id="addbutton" class="nomargin button postfix"><iron-icon icon="icons:add"></iron-icon></a>
+                    <a id="addbutton" class="haeck primary nomargin button postfix"><iron-icon icon="icons:add"></iron-icon></a>
                 </div>
 
             </div>

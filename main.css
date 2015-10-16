@@ -218,6 +218,64 @@ paper-item .bold {
     font-weight: bold;
 }
 
+/** button CSS **/
+
+.haeck.primary {
+    background-color: #333;
+}
+
+.haeck.success {
+    background-color: #368A55;
+}
+
+.haeck.secondary {
+    background-color: #333;
+    color: #fff;
+}
+
+.haeck.primary, .haeck.secondary {
+    margin: 0.1em 0px;
+    padding: 0px 1em;
+}
+.haeck:hover, .haeck:focus {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.15) 49%, rgba(0, 0, 0, 0.1) 51%, rgba(0, 0, 0, 0.15));
+}
+body .haeck {
+    margin: 8px 4px;
+    font-size: 13px;
+}
+.haeck, a.haeck {
+    border-width: 1px;
+    border-style: solid;
+    -moz-border-top-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    border-image: none;
+    border-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.4);
+    color: #FFF;
+    box-shadow: 0px 0.08em 0px rgba(255, 255, 255, 0.4) inset, 0px 0px 0.1em rgba(255, 255, 255, 0.9) inset;
+    cursor: pointer;
+    display: inline-block;
+    font: bold 100%/2.1 "Lucida Grande",Tahoma,sans-serif;
+    padding: 0px 0.95em 0px 0px;
+    text-align: center;
+    text-decoration: none;
+    -moz-user-select: none;
+    position: relative;
+    z-index: 100;
+    border-radius: 0.3em;
+    height: 2.3125rem;
+}
+
+.haeck {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05) 49%, rgba(0, 0, 0, 0.05) 51%, rgba(0, 0, 0, 0.1));
+}
+
+.haeck.tiny {
+    height: 1.75rem;
+    font-size: 0.75em;
+}
 
 @media only screen and (min-width: 150px) and (max-width: 650px){
     .top-bar-section ul {
