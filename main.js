@@ -167,7 +167,8 @@ if (Meteor.isClient) {
                 port: t.find("#irc_port").value,
                 password: t.find("#irc_password").value,
                 nickname: t.find("#irc_nick").value,
-                channel: t.find("#channel").value
+                channel: t.find("#channel").value,
+                znc: t.find("#znc").value
             };
 
             Meteor.call("connectServer", json);
@@ -588,6 +589,7 @@ if (Meteor.isServer) {
                 username: json.nickname,
                 channels: [],
                 user: Meteor.userId(),
+                znc: json.znc,
                 stripColors: true
             };
 

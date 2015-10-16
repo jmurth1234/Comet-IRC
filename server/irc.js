@@ -22,7 +22,8 @@ IRC = function IRC(params) {
         debug: (params && params.debug) || true,
         user: (params && params.user) || 0,
         server_id: (params && params.server_id) || "",
-        stripColors: (params && params.stripColors) || true
+        stripColors: (params && params.stripColors) || true,
+        znc: (params && params.znc) || false
     };
 
     this.channels = ["something"];
@@ -44,9 +45,11 @@ IRC.prototype.connect = function() {
         self.send('NICK', self.config.nick);
         self.send('USER', self.config.username, 8, "*", self.config.realname);
 
-        self.send('CAP', 'LS');
-        self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-        self.send('CAP', 'END');
+        if (self.config.znc) {
+            self.send('CAP', 'LS');
+            self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+            self.send('CAP', 'END');
+        }
 
         if (self.config.password !== "")
             self.send('PASS', self.config.password);
