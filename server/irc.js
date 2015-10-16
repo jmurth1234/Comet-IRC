@@ -119,7 +119,7 @@ IRC.prototype.connect = function() {
                         });
                     }
 
-                    addMessageToDb(self, channel, handle, text, action, date);
+                    addMessageToDb(self, channel, handle, text, action, date, highlighted);
 
                     if (self.channels.indexOf(channel) === -1) {
                         self.channels.push(channel);
@@ -251,7 +251,7 @@ IRC.prototype.connect = function() {
             channel: chan,
             server: self.config.server_id,
             text: escapeHtml(message),
-            css: cssClass.join(""),
+            css: cssClass.join(" "),
             date_time: date,
             time: currentTime,
             action: action,
