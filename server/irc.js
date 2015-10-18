@@ -68,8 +68,6 @@ IRC.prototype.connect = function() {
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
-            //console.log(line);
-
             switch (line.command) {
                 case "PING":
                     self.send("PONG", line.args[0]);
@@ -91,6 +89,11 @@ IRC.prototype.connect = function() {
                 case "PRIVMSG":
                     var handle = line.nick;
                     var channel = line.args[0];
+
+                    if (line.args[0] == self.config.nick) {
+                        channel = handle;
+                    }
+
                     var text = line.args[1];
                     var action = false;
                     if (text.substring(1, 7) === 'ACTION') {

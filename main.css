@@ -182,7 +182,7 @@ paper-item .bold {
 .dropdown-content-li {
     float: none !important;
     max-width: 400px;
-
+    color: #fff;
 }
 
 .notifications {
@@ -275,6 +275,15 @@ body .haeck {
 .haeck.tiny {
     height: 1.75rem;
     font-size: 0.75em;
+}
+
+.user {
+    color: inherit !important;
+    text-decoration: none;
+}
+
+.user:hover {
+    text-decoration: underline;
 }
 
 @media only screen and (min-width: 150px) and (max-width: 650px){

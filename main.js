@@ -120,6 +120,44 @@ if (Meteor.isClient) {
         messages.scrollTop( messages.prop("scrollHeight") );
     };
 
+    Template.message.events({
+        "click .user": function (event) {
+            var json = {
+                server: event.currentTarget.id,
+                user: jQuery(event.target).text()
+            };
+
+            Meteor.call("messageUser", json);
+
+            var currChannel = jQuery(event.target).text();
+            Session.set(currChannel + "Limit", ITEMS_INCREMENT);
+            Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+
+            Session.set("currChannel", currChannel);
+            Session.set("currServer", event.currentTarget.id);
+        }
+    });
+
+
+    Template.user.events({
+        "click .user": function (event) {
+            var json = {
+                server: event.currentTarget.id,
+                user: jQuery(event.target).text()
+            };
+
+            Meteor.call("messageUser", json);
+
+            var currChannel = jQuery(event.target).text();
+            Session.set(currChannel + "Limit", ITEMS_INCREMENT);
+            Meteor.subscribe("IRCMessages", Session.get(currChannel + "Limit"), currChannel);
+
+            Session.set("currChannel", jQuery(event.target).text());
+            Session.set("currServer", event.currentTarget.id);
+        }
+    })
+
+
     Template.channelmsg.rendered = function () {
         if (Meteor.Device.isPhone())
             jQuery("#msginput").attr("autocomplete", "on");
@@ -196,6 +234,8 @@ if (Meteor.isClient) {
             t.find("#msginput").value = "";
         },
         "click #tabbutton": function (e) {
+            var input = document.getElementById('msginput');
+
             var words = input.value.split(" ");
             var word  = words[words.length - 1];
             var isFirst = words.length === 1;
@@ -216,6 +256,8 @@ if (Meteor.isClient) {
                     }
                 }
             });
+
+            input.focus();
         },
         "click #addbutton": function (e) { document.getElementById('imageitModal').toggle() },
     });
@@ -618,6 +660,16 @@ if (Meteor.isServer) {
                 client.action(json.channel, json.message);
             else
                 client.say(json.channel, json.message);
+        },
+
+        messageUser: function (json) {
+            console.log(json.user + " " + json.server);
+            IRCChannels.insert({
+                channel: json.user,
+                server: json.server,
+                sortChannel: json.user,
+                user: Meteor.userId()
+            });
         }
     });
 

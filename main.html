@@ -126,7 +126,7 @@
     {{#if action}}
         <li class="message">[{{time}}]<span style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></li>
     {{else}}
-        <li class="message {{css}}">[{{time}}] &lt;{{handle}}&gt; {{{text}}}</li>
+        <li class="message {{css}}">[{{time}}] &lt;<a class="user" id="{{server}}" href="#">{{handle}}</a>&gt; {{{text}}}</li>
     {{/if}}
 
 </template>
@@ -149,7 +149,7 @@
 
 
 <template name="user">
-    <li class="dropdown-content-li"><a href="#" id="{{server}}">{{ircuser}}</a></li>
+    <li class="dropdown-content-li"><a href="#" class="user" id="{{server}}">{{ircuser}}</a></li>
 </template>
 
 <template name="notification">
