@@ -100,6 +100,7 @@ IRC.prototype.connect = function() {
                         var text = text.substring(8);
                         action = true;
                     }
+
                     var date;
                     if ("server_time" in line)
                         date = line.server_time;
@@ -225,16 +226,6 @@ IRC.prototype.connect = function() {
 
         date = date || new Date();
 
-        var currentTime = "";
-        var hours = date.getHours();
-        var minutes = date.getMinutes();
-
-        if (minutes < 10) {
-            minutes = "0" + minutes
-        }
-
-        currentTime += hours + ":" + minutes;
-
         var cssClass = [];
 
         if (highlighted) {
@@ -245,7 +236,6 @@ IRC.prototype.connect = function() {
             cssClass.push("self");
         }
 
-
         //insert irc message into db
         IRCMessages.insert({
             handle: user,
@@ -253,8 +243,8 @@ IRC.prototype.connect = function() {
             server: self.config.server_id,
             text: escapeHtml(message),
             css: cssClass.join(" "),
-            date_time: date,
-            time: currentTime,
+            date_time: localize_date(date),
+            time: "",
             action: action,
             user: self.config.user,
             irc: true,
@@ -327,7 +317,7 @@ IRC.prototype.send = function(command) {
  */
 IRC.prototype.say = function(channel, message) {
     //insert irc message into db
-    var date = new Date()
+    var date = new Date();
     var currentTime = "";
     var hours = date.getHours();
     var minutes = date.getMinutes();
@@ -342,8 +332,8 @@ IRC.prototype.say = function(channel, message) {
         handle: this.config.nick,
         channel: channel,
         text: escapeHtml(message),
-        date_time: date,
-        time: currentTime,
+        date_time: localize_date(date),
+        time: "",
         action: false,
         user: this.config.user,
         irc: true,
@@ -370,8 +360,8 @@ IRC.prototype.action = function(channel, message) {
         handle: this.config.nick,
         channel: channel,
         text: escapeHtml(message.replace("/me ", "")),
-        date_time: date,
-        time: currentTime,
+        date_time: localize_date(date),
+        time: "",
         action: true,
         user: this.config.user,
         irc: true,
@@ -472,4 +462,12 @@ function escapeHtml(string) {
     return String(string).replace(/[&<>"'\/]/g, function (s) {
         return entityMap[s];
     });
+}
+
+
+function localize_date(date_to_convert_str) {
+    var date_to_convert = new Date(date_to_convert_str);
+    var local_date = new Date();
+    date_to_convert.setHours(date_to_convert.getHours()+local_date.getTimezoneOffset());
+    return date_to_convert.toString();
 }

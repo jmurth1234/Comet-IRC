@@ -95,6 +95,20 @@ if (Meteor.isClient) {
 
             for (i = 0; i < messages.length; i++) {
                 var message = messages[i];
+
+                var date = localize_date(message.date_time);
+
+                message.date_time = date.toString();
+
+                var hours = date.getHours();
+                var minutes = date.getMinutes();
+
+                if (minutes < 10) {
+                    minutes = "0" + minutes
+                }
+
+                message["time"] += hours + ":" + minutes;
+
                 list.push(message);
             }
 
@@ -673,4 +687,12 @@ if (Meteor.isServer) {
         }
     });
 
+}
+
+
+function localize_date(date_to_convert_str) {
+    var date_to_convert = new Date(date_to_convert_str);
+    var local_date = new Date();
+    date_to_convert.setHours(date_to_convert.getHours()+local_date.getTimezoneOffset());
+    return date_to_convert;
 }
