@@ -243,7 +243,7 @@ IRC.prototype.connect = function() {
             server: self.config.server_id,
             text: escapeHtml(message),
             css: cssClass.join(" "),
-            date_time: localize_date(date).toUTCString(),
+            date_time: date.toString(),
             time: "",
             action: action,
             user: self.config.user,
@@ -332,7 +332,7 @@ IRC.prototype.say = function(channel, message) {
         handle: this.config.nick,
         channel: channel,
         text: escapeHtml(message),
-        date_time: localize_date(date).toUTCString(),
+        date_time: date.toString(),
         time: "",
         action: false,
         user: this.config.user,
@@ -360,7 +360,7 @@ IRC.prototype.action = function(channel, message) {
         handle: this.config.nick,
         channel: channel,
         text: escapeHtml(message.replace("/me ", "")),
-        date_time: localize_date(date).toUTCString(),
+        date_time: date.toString(),
         time: "",
         action: true,
         user: this.config.user,
@@ -465,9 +465,13 @@ function escapeHtml(string) {
 }
 
 
-function localize_date(date_to_convert_str) {
-    var date_to_convert = new Date(date_to_convert_str);
-    var local_date = new Date();
-    date_to_convert.setHours(date_to_convert.getHours() + (local_date.getTimezoneOffset() / 60));
-    return date_to_convert;
+function localize_date(date) {
+    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;
 }

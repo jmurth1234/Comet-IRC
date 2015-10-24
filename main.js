@@ -96,7 +96,7 @@ if (Meteor.isClient) {
             for (i = 0; i < messages.length; i++) {
                 var message = messages[i];
 
-                var date = localize_date(message.date_time);
+                var date = localize_date(new Date(message.date_time));
 
                 message.date_time = date.toString();
 
@@ -690,9 +690,13 @@ if (Meteor.isServer) {
 }
 
 
-function localize_date(date_to_convert_str) {
-    var date_to_convert = new Date(date_to_convert_str);
-    var local_date = new Date();
-    date_to_convert.setHours(date_to_convert.getHours() + (local_date.getTimezoneOffset() / 60));
-    return date_to_convert;
+function localize_date(date) {
+    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+
+    var offset = date.getTimezoneOffset() / 60;
+    var hours = date.getHours();
+
+    newDate.setHours(hours - offset);
+
+    return newDate;
 }
