@@ -468,6 +468,6 @@ function escapeHtml(string) {
 function localize_date(date_to_convert_str) {
     var date_to_convert = new Date(date_to_convert_str);
     var local_date = new Date();
-    date_to_convert.setHours(date_to_convert.getHours()+local_date.getTimezoneOffset());
+    date_to_convert.setHours(date_to_convert.getHours() + (local_date.getTimezoneOffset() / 60));
     return date_to_convert;
 }
