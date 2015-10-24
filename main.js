@@ -96,7 +96,7 @@ if (Meteor.isClient) {
             for (i = 0; i < messages.length; i++) {
                 var message = messages[i];
 
-                var date = localize_date(new Date(message.date_time));
+                var date = new Date(message.date_time);
 
                 message.date_time = date.toString();
 
