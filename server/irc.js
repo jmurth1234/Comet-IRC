@@ -1,4 +1,5 @@
 var net = Npm.require('net');
+var tls = Npm.require('tls');
 
 /**
  * IRC Constructor
@@ -23,7 +24,8 @@ IRC = function IRC(params) {
         user: (params && params.user) || 0,
         server_id: (params && params.server_id) || "",
         stripColors: (params && params.stripColors) || true,
-        znc: (params && params.znc) || false
+        znc: (params && params.znc) || false,
+        ssl: (params && params.ssl) || false
     };
 
     this.channels = ["something"];
@@ -36,10 +38,45 @@ IRC = function IRC(params) {
  */
 IRC.prototype.connect = function() {
     var self = this;
-    self.connection = net.createConnection(self.options.port, self.options.server, function() {
-        if (self.config.debug) console.log('connecting...');
-    });
-    this.connection.setEncoding('utf8');
+
+    // socket opts
+    var connectionOptions = {
+        host: self.options.server,
+        port: self.options.port,
+        rejectUnauthorized: false
+    };
+
+
+    if (self.config.ssl) {
+        console.log('connecting vis ssl');
+        self.connection = tls.connect(connectionOptions, function () {
+            // callback called only after successful socket connection
+            self.connection.connected = true;
+            self.connection.setEncoding('utf8');
+
+            self.send('NICK', self.config.nick);
+            self.send('USER', self.config.username, 8, "*", self.config.realname);
+
+            if (self.config.znc) {
+                self.send('CAP', 'LS');
+                self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                self.send('CAP', 'END');
+            }
+
+            if (self.config.password !== "")
+                self.send('PASS', self.config.password);
+
+            _.each(self.config.channels, function (channel) {
+                self.send('JOIN', channel);
+            });
+        });
+    } else {
+        self.connection = net.createConnection(self.options.port, self.options.server, function() {
+            if (self.config.debug) console.log('connecting...');
+        });
+    }
+
+
 
     this.connection.addListener('connect', function() {
         self.send('NICK', self.config.nick);
@@ -244,6 +281,7 @@ IRC.prototype.connect = function() {
             text: escapeHtml(message),
             css: cssClass.join(" "),
             date_time: date.toString(),
+            date_sort: Date.parse(date.toString()),
             time: "",
             action: action,
             user: self.config.user,
@@ -333,6 +371,7 @@ IRC.prototype.say = function(channel, message) {
         channel: channel,
         text: escapeHtml(message),
         date_time: date.toString(),
+        date_sort: Date.parse(date.toString()),
         time: "",
         action: false,
         user: this.config.user,
@@ -361,6 +400,7 @@ IRC.prototype.action = function(channel, message) {
         channel: channel,
         text: escapeHtml(message.replace("/me ", "")),
         date_time: date.toString(),
+        date_sort: Date.parse(date.toString()),
         time: "",
         action: true,
         user: this.config.user,
