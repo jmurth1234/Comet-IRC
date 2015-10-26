@@ -86,7 +86,7 @@ if (Meteor.isClient) {
     Template.body.helpers({
         messages: function() {
             var list = [];
-            var messages =  IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_time: -1}, transform: function(doc) {
+            var messages =  IRCMessages.find({channel: Session.get("currChannel")}, {sort: {date_sort: -1}, transform: function(doc) {
                 if(doc.text) {
                     doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
                 }
@@ -220,7 +220,8 @@ if (Meteor.isClient) {
                 password: t.find("#irc_password").value,
                 nickname: t.find("#irc_nick").value,
                 channel: t.find("#channel").value,
-                znc: t.find("#znc").value
+                ssl: t.find("#ssl").checked,
+                znc: t.find("#znc").checked
             };
 
             Meteor.call("connectServer", json);
@@ -643,6 +644,7 @@ if (Meteor.isServer) {
                 password: json.password,
                 realname: json.nickname,
                 username: json.nickname,
+                ssl: json.ssl,
                 channels: [],
                 user: Meteor.userId(),
                 znc: json.znc,
