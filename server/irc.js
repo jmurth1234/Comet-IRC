@@ -237,6 +237,23 @@ IRC.prototype.connect = function() {
                     // TODO: handle nick changes
                     // DEPENDS ON LIST OF USERS
                     break;
+                case "433":
+                    self.send('NICK', self.config.nick + "_");
+                    self.send('USER', self.config.username, 8, "*", self.config.realname);
+
+                    if (self.config.znc) {
+                        self.send('CAP', 'LS');
+                        self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                        self.send('CAP', 'END');
+                    }
+
+                    if (self.config.password !== "")
+                        self.send('PASS', self.config.password);
+
+                    _.each(self.config.channels, function(channel) {
+                        self.send('JOIN', channel);
+                    });
+                    break;
                 default:
                     break;
             }
