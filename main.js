@@ -53,7 +53,7 @@ if (Meteor.isClient) {
             var users = [];
             var voiced = [];
             var opped = [];
-            var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currentServer")}, {sort: {ircuser_sorting: 1}}).fetch();
+            var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}}).fetch();
 
             for (i = 0; i < list.length; i++) {
                 var user = list[i];
@@ -86,7 +86,7 @@ if (Meteor.isClient) {
     Template.body.helpers({
         messages: function() {
             var list = [];
-            var messages =  IRCMessages.find({channel: Session.get("currChannel"), server: Session.get("currentServer")}, {sort: {date_sort: -1}, transform: function(doc) {
+            var messages =  IRCMessages.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {date_sort: -1}, transform: function(doc) {
                 if(doc.text) {
                     doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
                 }
