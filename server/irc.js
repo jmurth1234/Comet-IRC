@@ -385,6 +385,7 @@ IRC.prototype.say = function(channel, message) {
 
     IRCMessages.insert({
         handle: this.config.nick,
+        server: this.config.server_id,
         channel: channel,
         text: escapeHtml(message),
         date_time: date.toString(),
@@ -414,6 +415,7 @@ IRC.prototype.action = function(channel, message) {
 
     IRCMessages.insert({
         handle: this.config.nick,
+        server: this.config.server_id,
         channel: channel,
         text: escapeHtml(message.replace("/me ", "")),
         date_time: date.toString(),
