@@ -585,7 +585,7 @@ if (Meteor.isServer) {
         return IRCMessages.find({
             user: this.userId,
             channel: currChannel
-        }, {limit: limit, sort: {date_time: -1}});
+        }, {limit: limit, sort: {date_sort: -1}});
     });
 
     Meteor.publish("IRCChannels", function() {
