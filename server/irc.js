@@ -102,6 +102,7 @@ IRC.prototype.connect = function() {
         self.buffer += chunk;
         var lines = self.buffer.split("\r\n");
         self.buffer = lines.pop();
+        console.log(lines);
         lines.forEach(function(dirtyLine) {
             var line = self.parseLine(dirtyLine);
 
