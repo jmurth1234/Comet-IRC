@@ -196,7 +196,7 @@ if (Meteor.isClient) {
                 var list = IRCUsers.find({
                     channel: Session.get("currChannel"),
                     server: Session.get("currServer")
-                }, {sort: {ircuser_sorting: 1}});
+                }, {sort: {ircuser_sorting: 1}}).fetch();
 
 
                 for (i = 0; i < list.length; i++) {
@@ -272,7 +272,7 @@ if (Meteor.isClient) {
             var list = IRCUsers.find({
                 channel: Session.get("currChannel"),
                 server: Session.get("currServer")
-            }, {sort: {ircuser_sorting: 1}});
+            }, {sort: {ircuser_sorting: 1}}).fetch();
 
             for (i = 0; i < list.length; i++) {
                 var user = list[i];
