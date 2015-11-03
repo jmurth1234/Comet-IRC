@@ -328,6 +328,7 @@ IRC.prototype.connect = function() {
  */
 IRC.prototype.join = function(channel) {
     if (this.connection) {
+        self.channels.push(channel);
         this.send.apply(this, ['JOIN'].concat(channel));
         IRCChannels.insert({
             channel: channel,
@@ -346,6 +347,7 @@ IRC.prototype.join = function(channel) {
  */
 IRC.prototype.part = function(channel) {
     if (this.connection) {
+        self.channels.pop(channel);
         this.send.apply(this, ['PART'].concat(channel));
         IRCChannels.remove({
             channel: channel,
@@ -463,7 +465,7 @@ IRC.prototype.disconnect = function(msg) {
     var message = msg || 'Powered by Comet-IRC https://github.com/rymate1234/Comet-IRC';
     this.send("QUIT", message);
 
-    IRCConnections.remove({server: this.config.server_id});
+    IRCConnections.remove({_id: this.config.server_id});
     IRCUsers.remove({server: this.config.server_id});
     IRCChannels.remove({server: this.config.server_id});
 
