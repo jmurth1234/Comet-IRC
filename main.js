@@ -188,7 +188,7 @@ if (Meteor.isClient) {
                 var word  = words[words.length - 1];
                 var isFirst = words.length === 1;
 
-                var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+                var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}});
 
                 list.forEach(function (user) {
                     if (word.length == 0) {
@@ -202,6 +202,7 @@ if (Meteor.isClient) {
                             words[words.length - 1] = words[words.length - 1].replace(word, user.ircuser_norank);
                             input.value = words.join(" ");
                         }
+                        return;
                     }
                 });
             }
@@ -255,7 +256,7 @@ if (Meteor.isClient) {
             var word  = words[words.length - 1];
             var isFirst = words.length === 1;
 
-            var list = IRCUsers.find({channel: Session.get("currChannel")}, {sort: {ircuser_sorting: 1}});
+            var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}});
 
             list.forEach(function (user) {
                 if (word.length == 0) {
@@ -269,6 +270,7 @@ if (Meteor.isClient) {
                         words[words.length - 1] = words[words.length - 1].replace(word, user.ircuser_norank);
                         input.value = words.join(" ");
                     }
+                    return;
                 }
             });
 
