@@ -198,7 +198,9 @@ if (Meteor.isClient) {
                     server: Session.get("currServer")
                 }, {sort: {ircuser_sorting: 1}});
 
-                list.forEach(function (user) {
+
+                for (i = 0; i < list.length; i++) {
+                    var user = list[i];
                     if (word.length == 0) {
                         return;
                     }
@@ -212,7 +214,7 @@ if (Meteor.isClient) {
                         }
                         return;
                     }
-                });
+                }
             }
         });
     };
@@ -271,7 +273,8 @@ if (Meteor.isClient) {
                 server: Session.get("currServer")
             }, {sort: {ircuser_sorting: 1}});
 
-            list.forEach(function (user) {
+            for (i = 0; i < list.length; i++) {
+                var user = list[i];
                 if (word.length == 0) {
                     return;
                 }
@@ -285,7 +288,7 @@ if (Meteor.isClient) {
                     }
                     return;
                 }
-            });
+            }
 
             input.focus();
         },
@@ -672,9 +675,11 @@ if (Meteor.isServer) {
 
             connections.addItem(serverId, client);
 
-            Meteor.setTimeout(function () {
-                client.join(json.channel);
-            }, 10000);
+            if (json.channel !== "") {
+                Meteor.setTimeout(function () {
+                    client.join(json.channel);
+                }, 10000);
+            }
 
             return serverId;
         },

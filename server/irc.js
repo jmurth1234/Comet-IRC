@@ -463,9 +463,9 @@ IRC.prototype.disconnect = function(msg) {
     var message = msg || 'Powered by Comet-IRC https://github.com/rymate1234/Comet-IRC';
     this.send("QUIT", message);
 
-    IRCConnections.remove({server: self.config.server_id});
-    IRCUsers.remove({server: self.config.server_id});
-    IRCChannels.remove({server: self.config.server_id});
+    IRCConnections.remove({server: this.config.server_id});
+    IRCUsers.remove({server: this.config.server_id});
+    IRCChannels.remove({server: this.config.server_id});
 
     this.connection.end();
 };
