@@ -237,6 +237,7 @@ if (Meteor.isClient) {
 
             Meteor.call("connectServer", json, function(error, result){
                 Session.set('currServer', result);
+                toastr.info("If you didn't specify a channel to join, use the command /join", "You're now connected!")
             });
 
             document.getElementById('connectModal').toggle();

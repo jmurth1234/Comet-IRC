@@ -328,7 +328,7 @@ IRC.prototype.connect = function() {
  */
 IRC.prototype.join = function(channel) {
     if (this.connection) {
-        self.channels.push(channel);
+        this.channels.push(channel);
         this.send.apply(this, ['JOIN'].concat(channel));
         IRCChannels.insert({
             channel: channel,
@@ -347,7 +347,7 @@ IRC.prototype.join = function(channel) {
  */
 IRC.prototype.part = function(channel) {
     if (this.connection) {
-        self.channels.pop(channel);
+        this.channels.pop(channel);
         this.send.apply(this, ['PART'].concat(channel));
         IRCChannels.remove({
             channel: channel,
