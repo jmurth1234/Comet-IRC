@@ -202,6 +202,7 @@ if (Meteor.isClient) {
                             words[words.length - 1] = words[words.length - 1].replace(word, user.ircuser_norank);
                             input.value = words.join(" ");
                         }
+                        return;
                     }
                 });
             }
@@ -269,6 +270,7 @@ if (Meteor.isClient) {
                         words[words.length - 1] = words[words.length - 1].replace(word, user.ircuser_norank);
                         input.value = words.join(" ");
                     }
+                    return;
                 }
             });
 
