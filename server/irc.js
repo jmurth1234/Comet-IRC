@@ -38,22 +38,47 @@ IRC = function IRC(params) {
  */
 IRC.prototype.connect = function() {
     var self = this;
+    try {
+        // socket opts
+        var connectionOptions = {
+            host: self.options.server,
+            port: self.options.port,
+            rejectUnauthorized: false
+        };
 
-    // socket opts
-    var connectionOptions = {
-        host: self.options.server,
-        port: self.options.port,
-        rejectUnauthorized: false
-    };
+
+        if (self.config.ssl) {
+            console.log('connecting vis ssl');
+            self.connection = tls.connect(connectionOptions, function () {
+                // callback called only after successful socket connection
+                self.connection.connected = true;
+                self.connection.setEncoding('utf8');
+
+                self.send('NICK', self.config.nick);
+                self.send('USER', self.config.username, 8, "*", self.config.realname);
+
+                if (self.config.znc) {
+                    self.send('CAP', 'LS');
+                    self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                    self.send('CAP', 'END');
+                }
+
+                if (self.config.password !== "")
+                    self.send('PASS', self.config.password);
+
+                _.each(self.config.channels, function (channel) {
+                    self.send('JOIN', channel);
+                });
+            });
+        } else {
+            self.connection = net.createConnection(self.options.port, self.options.server, function() {
+                if (self.config.debug) console.log('connecting...');
+            });
+        }
 
 
-    if (self.config.ssl) {
-        console.log('connecting vis ssl');
-        self.connection = tls.connect(connectionOptions, function () {
-            // callback called only after successful socket connection
-            self.connection.connected = true;
-            self.connection.setEncoding('utf8');
 
+        this.connection.addListener('connect', function() {
             self.send('NICK', self.config.nick);
             self.send('USER', self.config.username, 8, "*", self.config.realname);
 
@@ -66,245 +91,230 @@ IRC.prototype.connect = function() {
             if (self.config.password !== "")
                 self.send('PASS', self.config.password);
 
-            _.each(self.config.channels, function (channel) {
+            _.each(self.config.channels, function(channel) {
                 self.send('JOIN', channel);
             });
         });
-    } else {
-        self.connection = net.createConnection(self.options.port, self.options.server, function() {
-            if (self.config.debug) console.log('connecting...');
-        });
-    }
 
+        //wrap in a meteor environment in order to use x.insert()
+        //fixme: on motd, identify with nickserv
+        this.connection.addListener('data', Meteor.bindEnvironment(function(chunk) {
+            self.buffer += chunk;
+            var lines = self.buffer.split("\r\n");
+            self.buffer = lines.pop();
+            lines.forEach(function(dirtyLine) {
+                var line = self.parseLine(dirtyLine);
 
-
-    this.connection.addListener('connect', function() {
-        self.send('NICK', self.config.nick);
-        self.send('USER', self.config.username, 8, "*", self.config.realname);
-
-        if (self.config.znc) {
-            self.send('CAP', 'LS');
-            self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-            self.send('CAP', 'END');
-        }
-
-        if (self.config.password !== "")
-            self.send('PASS', self.config.password);
-
-        _.each(self.config.channels, function(channel) {
-            self.send('JOIN', channel);
-        });
-    });
-
-    //wrap in a meteor environment in order to use x.insert()
-    //fixme: on motd, identify with nickserv
-    this.connection.addListener('data', Meteor.bindEnvironment(function(chunk) {
-        self.buffer += chunk;
-        var lines = self.buffer.split("\r\n");
-        self.buffer = lines.pop();
-        lines.forEach(function(dirtyLine) {
-            var line = self.parseLine(dirtyLine);
-
-            switch (line.command) {
-                case "PING":
-                    self.send("PONG", line.args[0]);
-                    break;
-                case "VERSION":
-                    self.send("METEOR-IRC 1.0", line.args[0]);
-                    break;
-                case "NOTICE":
-                    var nick = line.nick ? line.nick.toLowerCase() : '';
-                    var text = line.args[1] ? line.args[1].toLowerCase() : '';
-                    if (nick === 'nickserv') {
-                        if (text.indexOf('registered') != -1) {
-                            self.say('nickserv', 'IDENTIFY ' + self.config.password);
-                        } else if (text.indexOf('invalid') != -1) {
-                            self.nick(self.config.nick + Math.floor(Math.random() * 10));
+                switch (line.command) {
+                    case "PING":
+                        self.send("PONG", line.args[0]);
+                        break;
+                    case "VERSION":
+                        self.send("METEOR-IRC 1.0", line.args[0]);
+                        break;
+                    case "NOTICE":
+                        var nick = line.nick ? line.nick.toLowerCase() : '';
+                        var text = line.args[1] ? line.args[1].toLowerCase() : '';
+                        if (nick === 'nickserv') {
+                            if (text.indexOf('registered') != -1) {
+                                self.say('nickserv', 'IDENTIFY ' + self.config.password);
+                            } else if (text.indexOf('invalid') != -1) {
+                                self.nick(self.config.nick + Math.floor(Math.random() * 10));
+                            }
                         }
-                    }
-                    break;
-                case "PRIVMSG":
-                    var handle = line.nick;
-                    var channel = line.args[0];
+                        break;
+                    case "PRIVMSG":
+                        var handle = line.nick;
+                        var channel = line.args[0];
 
-                    if (line.args[0] == self.config.nick) {
-                        channel = handle;
-                    }
-
-                    var text = line.args[1];
-                    var action = false;
-                    if (text.substring(1, 7) === 'ACTION') {
-                        var text = text.substring(8);
-                        action = true;
-                    }
-
-                    var date;
-                    if ("server_time" in line)
-                        date = line.server_time;
-
-                    var highlighted = text.indexOf(self.config.nick) !== -1;
-                    if (highlighted) {
-                        console.log("mentioned!")
-                        serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel + " by " + handle, text);
-
-                        IRCPings.insert({
-                            handle: handle,
-                            channel: channel,
-                            server: self.config.server_id,
-                            text: escapeHtml(text),
-                            date_time: date || new Date(),
-                            action: action,
-                            user: self.config.user
-                        });
-                    }
-
-                    addMessageToDb(self, channel, handle, text, action, date, highlighted);
-
-                    if (self.channels.indexOf(channel) === -1) {
-                        self.channels.push(channel);
-                        IRCChannels.insert({
-                            channel: channel,
-                            server: self.config.server_id,
-                            sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                            user: self.config.user
-                        });
-                    }
-
-                    break;
-                case "QUIT":
-                    // TODO
-                    break;
-                case "PART":
-                    addMessageToDb(self, line.args[0], "", line.prefix + " left the channel!", true);
-
-                    if (self.channels.indexOf(line.args[0]) === -1) {
-                        self.channels.push(line.args[0]);
-                        IRCChannels.insert({
-                            channel: line.args[0],
-                            server: self.config.server_id,
-                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                            user: self.config.user,
-                        });
-                    }
-
-                    break;
-                case "JOIN":
-                    addMessageToDb(self, line.args[0], "", line.prefix + " joined the channel!", true);
-
-                    if (self.channels.indexOf(line.args[0]) === -1) {
-                        self.channels.push(line.args[0]);
-                        IRCChannels.insert({
-                            channel: line.args[0],
-                            server: self.config.server_id,
-                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                            user: self.config.user,
-                        });
-                    }
-
-                    break;
-                case "353":
-                    if (line.args[0] !== self.config.nick)
-                        self.config.nick = line.args[0];
-
-                    var userList = line.args[3].split(" ");
-
-                    //var addUsers = function (userList) {
-                    Meteor.defer( function () {
-                            userList.forEach(function (s) {
-                                var user_sorting = s.toLowerCase().replace("@", "").replace("+", "");
-                                var user_norank = s.replace("@", "").replace("+", "");
-                                IRCUsers.insert({
-                                    channel: line.args[2],
-                                    server: self.config.server_id,
-                                    ircuser: s,
-                                    ircuser_norank: user_norank,
-                                    ircuser_sorting: user_sorting,
-                                    user: self.config.user,
-                                });
-                            })
+                        if (line.args[0] == self.config.nick) {
+                            channel = handle;
                         }
-                    );
 
-                    //var addUsersAsync = Meteor.wrapAsync(addUsers);
-                    //addUsersAsync(userList);
+                        var text = line.args[1];
+                        var action = false;
+                        if (text.substring(1, 7) === 'ACTION') {
+                            var text = text.substring(8);
+                            action = true;
+                        }
 
-                    break;
-                case "332":
-                    addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
-                    break;
-                case "NICK":
-                    // TODO: handle nick changes
-                    // DEPENDS ON LIST OF USERS
-                    break;
-                case "433":
-                    self.send('NICK', self.config.nick + "_");
-                    self.send('USER', self.config.username, 8, "*", self.config.realname);
+                        var date;
+                        if ("server_time" in line)
+                            date = line.server_time;
 
-                    if (self.config.znc) {
-                        self.send('CAP', 'LS');
-                        self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-                        self.send('CAP', 'END');
-                    }
+                        var highlighted = text.indexOf(self.config.nick) !== -1;
+                        if (highlighted) {
+                            console.log("mentioned!")
+                            serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel + " by " + handle, text);
 
-                    if (self.config.password !== "")
-                        self.send('PASS', self.config.password);
+                            IRCPings.insert({
+                                handle: handle,
+                                channel: channel,
+                                server: self.config.server_id,
+                                text: escapeHtml(text),
+                                date_time: date || new Date(),
+                                action: action,
+                                user: self.config.user
+                            });
+                        }
 
-                    _.each(self.config.channels, function(channel) {
-                        self.send('JOIN', channel);
-                    });
-                    break;
-                default:
-                    break;
+                        addMessageToDb(self, channel, handle, text, action, date, highlighted);
+
+                        if (self.channels.indexOf(channel) === -1) {
+                            self.channels.push(channel);
+                            IRCChannels.insert({
+                                channel: channel,
+                                server: self.config.server_id,
+                                sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                                user: self.config.user
+                            });
+                        }
+
+                        break;
+                    case "QUIT":
+                        // TODO
+                        break;
+                    case "PART":
+                        addMessageToDb(self, line.args[0], "", line.prefix + " left the channel!", true);
+
+                        if (self.channels.indexOf(line.args[0]) === -1) {
+                            self.channels.push(line.args[0]);
+                            IRCChannels.insert({
+                                channel: line.args[0],
+                                server: self.config.server_id,
+                                sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                                user: self.config.user,
+                            });
+                        }
+
+                        break;
+                    case "JOIN":
+                        addMessageToDb(self, line.args[0], "", line.prefix + " joined the channel!", true);
+
+                        if (self.channels.indexOf(line.args[0]) === -1) {
+                            self.channels.push(line.args[0]);
+                            IRCChannels.insert({
+                                channel: line.args[0],
+                                server: self.config.server_id,
+                                sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                                user: self.config.user,
+                            });
+                        }
+
+                        break;
+                    case "353":
+                        if (line.args[0] !== self.config.nick)
+                            self.config.nick = line.args[0];
+
+                        var userList = line.args[3].split(" ");
+
+                        //var addUsers = function (userList) {
+                        Meteor.defer( function () {
+                                userList.forEach(function (s) {
+                                    var user_sorting = s.toLowerCase().replace("@", "").replace("+", "");
+                                    var user_norank = s.replace("@", "").replace("+", "");
+                                    IRCUsers.insert({
+                                        channel: line.args[2],
+                                        server: self.config.server_id,
+                                        ircuser: s,
+                                        ircuser_norank: user_norank,
+                                        ircuser_sorting: user_sorting,
+                                        user: self.config.user,
+                                    });
+                                })
+                            }
+                        );
+
+                        //var addUsersAsync = Meteor.wrapAsync(addUsers);
+                        //addUsersAsync(userList);
+
+                        break;
+                    case "332":
+                        addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
+                        break;
+                    case "NICK":
+                        // TODO: handle nick changes
+                        // DEPENDS ON LIST OF USERS
+                        break;
+                    case "433":
+                        self.send('NICK', self.config.nick + "_");
+                        self.send('USER', self.config.username, 8, "*", self.config.realname);
+
+                        if (self.config.znc) {
+                            self.send('CAP', 'LS');
+                            self.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                            self.send('CAP', 'END');
+                        }
+
+                        if (self.config.password !== "")
+                            self.send('PASS', self.config.password);
+
+                        _.each(self.config.channels, function(channel) {
+                            self.send('JOIN', channel);
+                        });
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }, function(e) {
+            Meteor._debug("Exception from connection close callback:", e);
+        }));
+
+        this.connection.addListener('drain', function() {
+            self.buffer = '';
+        });
+
+        this.connection.addListener('close', function() {
+            if (self.config.debug) console.log('disconnected');
+        })
+
+        function addMessageToDb(self, chan, user, message, action, date, highlighted) {
+            if (date === undefined) {
+                date = new Date();
             }
-        });
-    }, function(e) {
-        Meteor._debug("Exception from connection close callback:", e);
-    }));
 
-    this.connection.addListener('drain', function() {
-        self.buffer = '';
-    });
+            if (highlighted === undefined) {
+                highlighted = false;
+            }
 
-    this.connection.addListener('close', function() {
-        if (self.config.debug) console.log('disconnected');
-    })
+            date = date || new Date();
 
-    function addMessageToDb(self, chan, user, message, action, date, highlighted) {
-        if (date === undefined) {
-            date = new Date();
+            var cssClass = [];
+
+            if (highlighted) {
+                cssClass.push("highlight");
+            }
+
+            if (user === self.config.nick) {
+                cssClass.push("self");
+            }
+
+            //insert irc message into db
+            IRCMessages.insert({
+                handle: user,
+                channel: chan,
+                server: self.config.server_id,
+                text: escapeHtml(message),
+                css: cssClass.join(" "),
+                date_time: date.toString(),
+                date_sort: date,
+                time: "",
+                action: action,
+                user: self.config.user,
+                irc: true,
+                bot: false
+            });
         }
 
-        if (highlighted === undefined) {
-            highlighted = false;
-        }
+    } catch (e) {
+        console.log(e);
+        self.disconnect("An error occurred in this irc client, bailing!");
 
-        date = date || new Date();
+        IRCConnections.remove({server: self.config.server_id});
+        IRCUsers.remove({server: self.config.server_id});
+        IRCChannels.remove({server: self.config.server_id});
 
-        var cssClass = [];
-
-        if (highlighted) {
-            cssClass.push("highlight");
-        }
-
-        if (user === self.config.nick) {
-            cssClass.push("self");
-        }
-
-        //insert irc message into db
-        IRCMessages.insert({
-            handle: user,
-            channel: chan,
-            server: self.config.server_id,
-            text: escapeHtml(message),
-            css: cssClass.join(" "),
-            date_time: date.toString(),
-            date_sort: date,
-            time: "",
-            action: action,
-            user: self.config.user,
-            irc: true,
-            bot: false
-        });
     }
 
 };
