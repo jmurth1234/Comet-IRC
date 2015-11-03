@@ -233,7 +233,9 @@ if (Meteor.isClient) {
                 znc: t.find("#znc").checked
             };
 
-            Meteor.call("connectServer", json);
+            Meteor.call("connectServer", json, function(error, result){
+                Session.set('currServer', result);
+            });
 
             document.getElementById('connectModal').toggle();
         },
@@ -673,6 +675,8 @@ if (Meteor.isServer) {
             Meteor.setTimeout(function () {
                 client.join(json.channel);
             }, 10000);
+
+            return serverId;
         },
 
         sendMessage: function (json) {
