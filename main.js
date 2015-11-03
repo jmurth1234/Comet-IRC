@@ -11,9 +11,9 @@ if (Meteor.isClient) {
     });
 
     Template.body.events({
-        "click #loadmore": function(event) {
+        "click #loadmore": function (event) {
             var channel = Session.get("currChannel");
-            Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT );
+            Session.set(channel + "Limit", Session.get(channel + "Limit") + ITEMS_INCREMENT);
             Meteor.subscribe("IRCMessages", Session.get(channel + "Limit"), channel);
         },
     });
@@ -38,7 +38,7 @@ if (Meteor.isClient) {
             console.log("test");
             document.getElementById('connectModal').toggle();
         },
-        "click #logout": function(event) {
+        "click #logout": function (event) {
             Meteor.logout();
             location.hash = "";
         },
@@ -49,11 +49,14 @@ if (Meteor.isClient) {
 
 
     Template.navbar.helpers({
-        users: function() {
+        users: function () {
             var users = [];
             var voiced = [];
             var opped = [];
-            var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}}).fetch();
+            var list = IRCUsers.find({
+                channel: Session.get("currChannel"),
+                server: Session.get("currServer")
+            }, {sort: {ircuser_sorting: 1}}).fetch();
 
             for (i = 0; i < list.length; i++) {
                 var user = list[i];
@@ -84,14 +87,16 @@ if (Meteor.isClient) {
 
 
     Template.body.helpers({
-        messages: function() {
+        messages: function () {
             var list = [];
-            var messages =  IRCMessages.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {date_sort: -1}, transform: function(doc) {
-                if(doc.text) {
-                    doc.text = doc.text.autoLink({ target: "_blank", rel: "nofollow", id: "1" });
+            var messages = IRCMessages.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {
+                sort: {date_sort: -1}, transform: function (doc) {
+                    if (doc.text) {
+                        doc.text = doc.text.autoLink({target: "_blank", rel: "nofollow", id: "1"});
+                    }
+                    return doc;
                 }
-                return doc;
-            }}).fetch();
+            }).fetch();
 
             for (i = 0; i < messages.length; i++) {
                 var message = messages[i];
@@ -115,12 +120,12 @@ if (Meteor.isClient) {
             return list.reverse();
         },
 
-        channels: function() {
+        channels: function () {
             var list = [];
             var servers = IRCConnections.find({});
             servers.forEach(function (server) {
                 list.push({name: server.server_name, title: true});
-                var channels = IRCChannels.find({server: server._id}, {sort: { sortChannel: 1 }});
+                var channels = IRCChannels.find({server: server._id}, {sort: {sortChannel: 1}});
                 channels.forEach(function (element) {
                     list.push({name: element.channel, title: false, server_id: server._id});
                 });
@@ -129,9 +134,9 @@ if (Meteor.isClient) {
         }
     });
 
-    Template.message.rendered = function(){
+    Template.message.rendered = function () {
         var messages = jQuery('#messages');
-        messages.scrollTop( messages.prop("scrollHeight") );
+        messages.scrollTop(messages.prop("scrollHeight"));
     };
 
     Template.message.events({
@@ -176,7 +181,7 @@ if (Meteor.isClient) {
         if (Meteor.Device.isPhone())
             jQuery("#msginput").attr("autocomplete", "on");
 
-        jQuery(".channelmsg").on('keydown', '#msginput', function(e) {
+        jQuery(".channelmsg").on('keydown', '#msginput', function (e) {
             var input = document.getElementById('msginput');
 
             var keyCode = e.keyCode || e.which;
@@ -185,10 +190,13 @@ if (Meteor.isClient) {
                 e.preventDefault();
 
                 var words = input.value.split(" ");
-                var word  = words[words.length - 1];
+                var word = words[words.length - 1];
                 var isFirst = words.length === 1;
 
-                var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}});
+                var list = IRCUsers.find({
+                    channel: Session.get("currChannel"),
+                    server: Session.get("currServer")
+                }, {sort: {ircuser_sorting: 1}});
 
                 list.forEach(function (user) {
                     if (word.length == 0) {
@@ -210,7 +218,7 @@ if (Meteor.isClient) {
     };
 
     Template.serverconnect.events({
-        "submit form": function(e, t) {
+        "submit form": function (e, t) {
             // Prevent default browser form submit
             e.preventDefault();
 
@@ -235,7 +243,7 @@ if (Meteor.isClient) {
     });
 
     Template.channelmsg.events({
-        "submit form": function(e, t) {
+        "submit form": function (e, t) {
             // Prevent default browser form submit
             e.preventDefault();
 
@@ -253,10 +261,13 @@ if (Meteor.isClient) {
             var input = document.getElementById('msginput');
 
             var words = input.value.split(" ");
-            var word  = words[words.length - 1];
+            var word = words[words.length - 1];
             var isFirst = words.length === 1;
 
-            var list = IRCUsers.find({channel: Session.get("currChannel"), server: Session.get("currServer")}, {sort: {ircuser_sorting: 1}});
+            var list = IRCUsers.find({
+                channel: Session.get("currChannel"),
+                server: Session.get("currServer")
+            }, {sort: {ircuser_sorting: 1}});
 
             list.forEach(function (user) {
                 if (word.length == 0) {
@@ -276,11 +287,13 @@ if (Meteor.isClient) {
 
             input.focus();
         },
-        "click #addbutton": function (e) { document.getElementById('imageitModal').toggle() },
+        "click #addbutton": function (e) {
+            document.getElementById('imageitModal').toggle()
+        },
     });
 
     Template.loginform.events({
-        'click #login': function(e, t) {
+        'click #login': function (e, t) {
             e.preventDefault();
             // retrieve the input field values
             var username = t.find('#username').value;
@@ -288,7 +301,7 @@ if (Meteor.isClient) {
 
             // If validation passes, supply the appropriate fields to the
             // Meteor.loginWithPassword() function.
-            Meteor.loginWithPassword(username, password, function(err) {
+            Meteor.loginWithPassword(username, password, function (err) {
                 if (!err) {
                     document.getElementById('loginSuccess').show();
                     document.getElementById('loginModal').toggle();
@@ -299,7 +312,7 @@ if (Meteor.isClient) {
             return false;
         },
 
-        'click #signup': function(e, t) {
+        'click #signup': function (e, t) {
             e.preventDefault();
             // retrieve the input field values
             var username = t.find('#username').value;
@@ -312,7 +325,7 @@ if (Meteor.isClient) {
             Accounts.createUser({
                 username: username,
                 password: password
-            }, function(err) {
+            }, function (err) {
                 if (!err) {
                     document.getElementById('registerSuccess').show();
                     document.getElementById('loginModal').toggle();
@@ -325,11 +338,11 @@ if (Meteor.isClient) {
     });
 
 
-    Template.body.rendered = function() {
+    Template.body.rendered = function () {
         var vph = jQuery(window).height();
         jQuery(".panel").height(vph - 95);
 
-        jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function() {
+        jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
             var modal = jQuery(this);
             if (modal.attr('id') === "loginModal") {
                 console.log("closing loginModal!");
@@ -512,7 +525,7 @@ if (Meteor.isClient) {
                     if (top.window) {
                         console.log("window is avaliable");
                     }
-                    console.log( "Window.location is " + top.window.location);
+                    console.log("Window.location is " + top.window.location);
                     //top.window.location.href = " + xhr.response;
                     msgInput.value = msgInput.value + "http://images.rymate.co.uk/view/" + xhr.response;
                 } else if (xhr.status == 413) {
@@ -549,8 +562,7 @@ if (Meteor.isClient) {
                 message: message
             });
         }
-        else
-        if (!("Notification" in window)) {
+        else if (!("Notification" in window)) {
             //alert("This browser does not support desktop notification");
             toastr.info(message, title)
 
@@ -558,7 +570,7 @@ if (Meteor.isClient) {
         else if (Notification.permission === "granted") {
             var options = {
                 body: message,
-                dir : "ltr"
+                dir: "ltr"
             };
             var notification = new Notification(title, options);
         }
@@ -571,7 +583,7 @@ if (Meteor.isClient) {
                 if (permission === "granted") {
                     var options = {
                         body: message,
-                        dir : "ltr"
+                        dir: "ltr"
                     };
                     var notification = new Notification(title, options);
                 }
@@ -583,39 +595,39 @@ if (Meteor.isClient) {
 if (Meteor.isServer) {
     var connections = new HashMap1d();
 
-    Meteor.publish("IRCMessages", function(limit, currChannel) {
+    Meteor.publish("IRCMessages", function (limit, currChannel) {
         return IRCMessages.find({
             user: this.userId,
             channel: currChannel
         }, {limit: limit, sort: {date_sort: -1}});
     });
 
-    Meteor.publish("IRCChannels", function() {
+    Meteor.publish("IRCChannels", function () {
         return IRCChannels.find({
             user: this.userId
         });
     });
 
-    Meteor.publish("IRCPings", function() {
+    Meteor.publish("IRCPings", function () {
         return IRCPings.find({
             user: this.userId
         });
     });
 
-    Meteor.publish("IRCUsers", function(currChannel) {
+    Meteor.publish("IRCUsers", function (currChannel) {
         return IRCUsers.find({
             user: this.userId,
             channel: currChannel
         });
     });
 
-    Meteor.publish("IRCConnections", function() {
+    Meteor.publish("IRCConnections", function () {
         return IRCConnections.find({
             user: this.userId
         });
     });
 
-    Meteor.startup(function() {
+    Meteor.startup(function () {
         IRCMessages.remove({});
         IRCConnections.remove({});
         IRCUsers.remove({});
@@ -624,7 +636,7 @@ if (Meteor.isServer) {
     });
 
     Meteor.methods({
-        connectServer: function(json) {
+        connectServer: function (json) {
             if (!Meteor.userId()) {
                 return;
             }
@@ -658,12 +670,12 @@ if (Meteor.isServer) {
 
             connections.addItem(serverId, client);
 
-            Meteor.setTimeout(function() {
+            Meteor.setTimeout(function () {
                 client.join(json.channel);
             }, 10000);
         },
 
-        sendMessage: function(json) {
+        sendMessage: function (json) {
             if (!Meteor.userId()) {
                 return;
             }
@@ -674,10 +686,17 @@ if (Meteor.isServer) {
 
             var client = connections.getItem(json.server);
 
-            if (json.message.indexOf("/me") == 0)
+            if (json.message.indexOf("/me") == 0) {
                 client.action(json.channel, json.message);
-            else
+            } else if (json.message.indexOf("/join") == 0) {
+                client.join(json.message.replace("/join ", ""));
+            } else if (json.message.indexOf("/part") == 0) {
+                client.part(json.message.replace("/part ", ""));
+            } else if (json.message.indexOf("/quit") == 0) {
+                client.disconnect(json.message.replace("/quit ", ""));
+            } else {
                 client.say(json.channel, json.message);
+            }
         },
 
         messageUser: function (json) {
@@ -695,7 +714,7 @@ if (Meteor.isServer) {
 
 
 function localize_date(date) {
-    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    var newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
 
     var offset = date.getTimezoneOffset() / 60;
     var hours = date.getHours();

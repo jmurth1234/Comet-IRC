@@ -329,6 +329,12 @@ IRC.prototype.connect = function() {
 IRC.prototype.join = function(channel) {
     if (this.connection) {
         this.send.apply(this, ['JOIN'].concat(channel));
+        IRCChannels.insert({
+            channel: channel,
+            server: this.config.server_id,
+            sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+            user: this.config.user,
+        });
     }
 };
 
@@ -341,6 +347,12 @@ IRC.prototype.join = function(channel) {
 IRC.prototype.part = function(channel) {
     if (this.connection) {
         this.send.apply(this, ['PART'].concat(channel));
+        IRCChannels.remove({
+            channel: channel,
+            server: this.config.server_id,
+            sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+            user: this.config.user,
+        });
     }
 };
 
@@ -448,8 +460,13 @@ IRC.prototype.action = function(channel, message) {
  * @param msg the quit message
  */
 IRC.prototype.disconnect = function(msg) {
-    var message = msg || 'Powered by Meteor-IRC http://github.com/Pent/meteor-irc';
+    var message = msg || 'Powered by Comet-IRC https://github.com/rymate1234/Comet-IRC';
     this.send("QUIT", message);
+
+    IRCConnections.remove({server: self.config.server_id});
+    IRCUsers.remove({server: self.config.server_id});
+    IRCChannels.remove({server: self.config.server_id});
+
     this.connection.end();
 };
 
