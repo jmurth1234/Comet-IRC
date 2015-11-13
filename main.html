@@ -29,19 +29,6 @@
         {{> navbar}}
     </div>
 
-    <div id="connectModal" class="reveal-modal tiny" data-reveal aria-labelledby="Connect" aria-hidden="true" role="dialog">
-        {{> serverconnect}}
-    </div>
-
-    <div id="loginModal" class="reveal-modal tiny" data-reveal aria-labelledby="Login" aria-hidden="true" role="dialog">
-        {{> loginform}}
-    </div>
-
-    <div id="imageitModal" class="reveal-modal" data-reveal aria-labelledby="Upload Image" aria-hidden="true"
-         role="dialog">
-        {{> imageit}}
-    </div>
-
 
     <div class="panel" id="messages">
         <div data-alert class="alert-box secondary">
@@ -56,6 +43,20 @@
     {{> channelmsg}}
 
 </div>
+
+<div id="connectModal" class="reveal-modal tiny" data-reveal aria-labelledby="Connect" aria-hidden="true" role="dialog">
+    {{> serverconnect}}
+</div>
+
+<div id="loginModal" class="reveal-modal tiny" data-reveal aria-labelledby="Login" aria-hidden="true" role="dialog">
+    {{> loginform}}
+</div>
+
+<div id="imageitModal" class="reveal-modal" data-reveal aria-labelledby="Upload Image" aria-hidden="true"
+     role="dialog">
+    {{> imageit}}
+</div>
+
 
 
 <paper-toast id="loginSuccess" text="Logged in successfully!"></paper-toast>
