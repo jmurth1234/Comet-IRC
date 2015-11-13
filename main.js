@@ -1,9 +1,10 @@
 if (Meteor.isClient) {
+    var snapper;
     var ITEMS_INCREMENT = 200;
 
     //Meteor.subscribe("IRCMessages", Session.get('itemsLimit'));
     Meteor.subscribe("IRCChannels");
-    Meteor.subscribe("IRCPings");
+    //Meteor.subscribe("IRCPings");
     Meteor.subscribe("IRCConnections");
 
     serverMessages.listen('serverMessage:' + Meteor.userId(), function (title, message) {
@@ -34,46 +35,14 @@ if (Meteor.isClient) {
     Template.channeltab.events(channelEvent);
 
     Template.navbar.events({
-        "click #connectModalLink": function (event) {
-            console.log("test");
-            document.getElementById('connectModal').toggle();
-        },
         "click #logout": function (event) {
             Meteor.logout();
             location.hash = "";
-        },
-        "click #loginModalLink": function () {
-            document.getElementById('loginModal').toggle();
         }
     });
 
 
     Template.navbar.helpers({
-        users: function () {
-            var users = [];
-            var voiced = [];
-            var opped = [];
-            var list = IRCUsers.find({
-                channel: Session.get("currChannel"),
-                server: Session.get("currServer")
-            }, {sort: {ircuser_sorting: 1}}).fetch();
-
-            for (i = 0; i < list.length; i++) {
-                var user = list[i];
-                if (user.ircuser.startsWith("@")) {
-                    opped.push(user);
-                } else if (user.ircuser.startsWith("+")) {
-                    voiced.push(user);
-                } else {
-                    users.push(user);
-                }
-            }
-
-            return opped.concat(voiced).concat(users);
-        },
-        isLoaded: function () {
-            return Session.get("loaded");
-        },
         hasNotifications: function () {
             return (IRCPings.find({}, {sort: {date_time: -1}}).count() != 0);
         },
@@ -131,7 +100,30 @@ if (Meteor.isClient) {
                 });
             });
             return list;
-        }
+        },
+
+        users: function () {
+            var users = [];
+            var voiced = [];
+            var opped = [];
+            var list = IRCUsers.find({
+                channel: Session.get("currChannel"),
+                server: Session.get("currServer")
+            }, {sort: {ircuser_sorting: 1}}).fetch();
+
+            for (i = 0; i < list.length; i++) {
+                var user = list[i];
+                if (user.ircuser.startsWith("@")) {
+                    opped.push(user);
+                } else if (user.ircuser.startsWith("+")) {
+                    voiced.push(user);
+                } else {
+                    users.push(user);
+                }
+            }
+
+            return opped.concat(voiced).concat(users);
+        },
     });
 
     Template.message.rendered = function () {
@@ -240,10 +232,10 @@ if (Meteor.isClient) {
                 toastr.info("If you didn't specify a channel to join, use the command /join", "You're now connected!")
             });
 
-            document.getElementById('connectModal').toggle();
+            $('#connectModal').foundation('reveal', 'close');
         },
         "click #cancelButton": function () {
-            document.getElementById('connectModal').toggle();
+            $('#connectModal').foundation('reveal', 'close');
         }
     });
 
@@ -296,10 +288,16 @@ if (Meteor.isClient) {
         "click #addbutton": function (e) {
             document.getElementById('imageitModal').toggle()
         },
+        "click #leftMenu": function (e) {
+            snapper.open('left');
+        },
+        "click #rightMenu": function (e) {
+            snapper.open('right');
+        }
     });
 
     Template.loginform.events({
-        'click #login': function (e, t) {
+        "submit form": function (e, t) {
             e.preventDefault();
             // retrieve the input field values
             var username = t.find('#username').value;
@@ -313,6 +311,22 @@ if (Meteor.isClient) {
                     document.getElementById('loginModal').toggle();
                 } else {
                     document.getElementById('loginFailure').show();
+                }
+            });
+            return false;
+        },
+        'click #login': function (e, t) {
+            e.preventDefault();
+            // retrieve the input field values
+            var username = t.find('#username').value;
+            var password = t.find('#password').value;
+
+            // If validation passes, supply the appropriate fields to the
+            // Meteor.loginWithPassword() function.
+            Meteor.loginWithPassword(username, password, function (err) {
+                if (!err) {
+                    $('#loginModal').foundation('reveal', 'close');
+                    toastr.info("", "Logged in!")
                 }
             });
             return false;
@@ -333,10 +347,8 @@ if (Meteor.isClient) {
                 password: password
             }, function (err) {
                 if (!err) {
-                    document.getElementById('registerSuccess').show();
-                    document.getElementById('loginModal').toggle();
-                } else {
-                    document.getElementById('registerFailure').show();
+                    $('#loginModal').foundation('reveal', 'close');
+                    toastr.info("", "Logged in!")
                 }
             });
             return false;
@@ -346,7 +358,7 @@ if (Meteor.isClient) {
 
     Template.body.rendered = function () {
         var vph = jQuery(window).height();
-        jQuery(".panel").height(vph - 95);
+        jQuery(".panel").height(vph - 96);
 
         jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
             var modal = jQuery(this);
@@ -359,19 +371,15 @@ if (Meteor.isClient) {
             }
         });
 
-        Session.set("loaded", false);
+        if (window.innerWidth <= 800) {
+            snapper = new Snap({
+                element: document.getElementById('mainContent'), hyperextensible: false,
+            });
+        }
 
-        // shitty workaround
-        setTimeout(function () {
-            console.log("loaded");
-
-            if (!Meteor.userId()) {
-                document.getElementById('loginModal').toggle();
-            }
-
-            Session.set("loaded", true);
-
-        }, 2000);
+        if (!Meteor.userId()) {
+            jQuery('#loginModalLink').trigger('click');
+        }
 
     };
 
@@ -555,10 +563,13 @@ if (Meteor.isClient) {
     window.onresize = window.onload = function () {
         var vph = jQuery(window).height();
 
-        if (jQuery("paper-tabs").css("display") === "none")
-            jQuery(".panel").height(vph - 98);
-        else
-            jQuery(".panel").height(vph - 150);
+        jQuery(".panel").height(vph - 96);
+
+        if (window.innerWidth <= 800) {
+            snapper = new Snap({
+                element: document.getElementById('mainContent'), hyperextensible: false,
+            });
+        }
     }
 
     function sendNotification(title, message) {

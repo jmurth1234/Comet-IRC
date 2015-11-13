@@ -4,61 +4,64 @@
 
     <meta name="mobile-web-app-capable" content="yes"/>
 
- <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0"/>
 
 </head>
 
 <body>
-    <paper-drawer-panel>
-        <div drawer>
-            <ul class="off-canvas-list">
-                {{#each channels}} {{> channel}} {{/each}}
-            </ul>
+<div class="snap-drawers">
+    <div class="snap-drawer snap-drawer-left">
+        <ul class="off-canvas-list">
+            {{#each channels}} {{> channel}} {{/each}}
+        </ul>
+    </div>
+
+    <div class="snap-drawer snap-drawer-right">
+        <ul class="off-canvas-list">
+            <li><label>Users</label></li>
+            {{#each users}} {{> user}} {{/each}}
+        </ul>
+    </div>
+</div>
+
+<div id="mainContent" class="main snap-content">
+    <div class="nav">
+        {{> navbar}}
+    </div>
+
+    <div id="connectModal" class="reveal-modal tiny" data-reveal aria-labelledby="Connect" aria-hidden="true" role="dialog">
+        {{> serverconnect}}
+    </div>
+
+    <div id="loginModal" class="reveal-modal tiny" data-reveal aria-labelledby="Login" aria-hidden="true" role="dialog">
+        {{> loginform}}
+    </div>
+
+    <div id="imageitModal" class="reveal-modal" data-reveal aria-labelledby="Upload Image" aria-hidden="true"
+         role="dialog">
+        {{> imageit}}
+    </div>
+
+
+    <div class="panel" id="messages">
+        <div data-alert class="alert-box secondary">
+            <button class="haeck primary tiny" id="loadmore">Load more scrollback.</button>
         </div>
-        <div main>
-
-            <div class="nav">
-                {{> navbar}}
-                <paper-tabs scrollable>
-                    {{#each channels}} {{> channeltab}} {{/each}}
-                </paper-tabs>
-            </div>
-
-            <paper-dialog id="connectModal" class="small" entry-animation="scale-up-animation"
-                  exit-animation="fade-out-animation">
-                {{> serverconnect}}
-            </paper-dialog>
-
-            <paper-dialog id="loginModal" class="small" entry-animation="scale-up-animation"
-                  exit-animation="fade-out-animation">
-                {{> loginform}}
-            </paper-dialog>
-
-            <paper-dialog id="imageitModal" class="small" entry-animation="scale-up-animation"
-                          exit-animation="fade-out-animation">
-                {{> imageit}}
-            </paper-dialog>
+        <ul class="messages">
+            {{#each messages}} {{> message}} {{/each}}
+        </ul>
+    </div>
 
 
-            <div class="panel" id="messages">
-                <div data-alert class="alert-box secondary">
-                    <button class="haeck primary tiny" id="loadmore">Load more scrollback.</button>
-                </div>
-                <ul class="messages">
-                    {{#each messages}} {{> message}} {{/each}}
-                </ul>
-            </div>
+    {{> channelmsg}}
+
+</div>
 
 
-            {{> channelmsg}}
-
-        </div>
-    </paper-drawer-panel>
-
-    <paper-toast id="loginSuccess" text="Logged in successfully!"></paper-toast>
-    <paper-toast id="loginFailure" text="Failed to login"></paper-toast>
-    <paper-toast id="registerSuccess" text="Registered successfully!."></paper-toast>
-    <paper-toast id="registerFailure" text="Failed to register"></paper-toast>
+<paper-toast id="loginSuccess" text="Logged in successfully!"></paper-toast>
+<paper-toast id="loginFailure" text="Failed to login"></paper-toast>
+<paper-toast id="registerSuccess" text="Registered successfully!."></paper-toast>
+<paper-toast id="registerFailure" text="Failed to register"></paper-toast>
 </body>
 
 <template name="navbar">
@@ -67,51 +70,40 @@
             {{#if currentUser}}
                 <!-- Left Nav Section -->
                 <ul class="left">
-                    <li class="inline"><paper-icon-button paper-drawer-toggle icon="icons:menu"></paper-icon-button></li>
-                    <li class="inline"><a href="#" class="bold" id="connectModalLink">Connect to a Server</a></li>
+                    <li class="inline"><a href="#" id="connectModalLink" data-reveal-id="connectModal">Connect</a></li>
                 </ul>
 
                 <!-- Right Nav Section -->
                 <ul class="right">
-                    {{#if isLoaded}}
+                    {{#if hasNotifications}}
                         <paper-menu-button>
-                            <paper-icon-button icon="social:people" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                            <ul class="dropdown-content">
-                                <li class="dropdown-content-li"><a class="bold">Users</a></li>
-                                {{#each users}} {{> user}} {{/each}}
+                            <paper-icon-button icon="social:notifications" class="dropdown-trigger"
+                                               vertical-align="top" horizontal-align="right"></paper-icon-button>
+                            <ul class="dropdown-content notifications">
+                                <li class="dropdown-content-li">
+                                    <a class="bold">
+                                        <paper-item>
+                                            <paper-item-body>
+                                                <div>Notifications: {{notificationsCount}}</div>
+                                            </paper-item-body>
+                                        </paper-item>
+                                    </a>
+                                </li>
+                                {{#each notifications}}
+                                    <li class="dropdown-content-li"><a>{{> notification}}</a></li>
+                                {{/each}}
+
                             </ul>
-
                         </paper-menu-button>
-
-                        {{#if hasNotifications}}
-                            <paper-menu-button>
-                                <paper-icon-button icon="social:notifications" class="dropdown-trigger" vertical-align="top" horizontal-align="right"></paper-icon-button>
-                                <ul class="dropdown-content notifications">
-                                    <li class="dropdown-content-li">
-                                        <a class="bold">
-                                            <paper-item>
-                                                <paper-item-body>
-                                                    <div>Notifications: {{notificationsCount}}</div>
-                                                </paper-item-body>
-                                            </paper-item>
-                                        </a>
-                                    </li>
-                                    {{#each notifications}}<li class="dropdown-content-li"><a>{{> notification}}</a></li>{{/each}}
-
-                                </ul>
-                            </paper-menu-button>
-                        {{else}}
-                            <paper-icon-button icon="social:notifications-none"></paper-icon-button>
-                        {{/if}}
+                    {{else}}
+                        <paper-icon-button icon="social:notifications-none"></paper-icon-button>
                     {{/if}}
-
                     <li class="inline"><a id="logout" href="#">Logout</a></li>
                 </ul>
 
             {{else}}
                 <ul class="right">
-                    <li class=""><a href="#" id="loginModalLink">Login /
-                        Sign up</a></li>
+                    <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login / Sign up</a></li>
                 </ul>
 
             {{/if}}
@@ -126,7 +118,8 @@
     {{#if action}}
         <li class="message">[{{time}}]<span style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></li>
     {{else}}
-        <li class="message {{css}}">[{{time}}] &lt;<a class="user" id="{{server}}" href="#">{{handle}}</a>&gt; {{{text}}}</li>
+        <li class="message {{css}}">[{{time}}] &lt;<a class="user" id="{{server}}"
+                                                      href="#">{{handle}}</a>&gt; {{{text}}}</li>
     {{/if}}
 
 </template>
@@ -149,24 +142,26 @@
 
 
 <template name="user">
-    <li class="dropdown-content-li"><a href="#" class="user" id="{{server}}">{{ircuser}}</a></li>
+    <li><a href="#" class="user" id="{{server}}">{{ircuser}}</a></li>
 </template>
 
 <template name="notification">
-<paper-item>
-    <paper-item-body two-line>
-        <div>Mentioned by {{handle}} in {{channel}}</div>
-        {{#if action}}
-            <div secondary> class="message">[{{time}}]<span style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></div>
-        {{else}}
-            <div secondary>&lt;{{handle}}&gt; {{{text}}}</div>
-        {{/if}}
-    </paper-item-body>
-</paper-item>
+    <paper-item>
+        <paper-item-body two-line>
+            <div>Mentioned by {{handle}} in {{channel}}</div>
+            {{#if action}}
+                <div secondary> class="message">[{{time}}]<span
+                        style="font-style: italic;color: #222;"> * {{handle}} {{{text}}}</span></div>
+            {{else}}
+                <div secondary>&lt;{{handle}}&gt; {{{text}}}</div>
+            {{/if}}
+        </paper-item-body>
+    </paper-item>
 </template>
 
 <template name="serverconnect">
     <h2>Connect to a Server</h2>
+
     <div>
         <form id="connect-form">
             <label for="irc_server_name">Server Name (Optional)</label>
@@ -199,9 +194,10 @@
             <label for="znc">Is this a ZNC?</label>
 
             <div class="button-group">
-                <button href="#!" aria-label="Close" type="submit" name="action" class="haeck success primary half-width">Connect
+                <button href="#!" aria-label="Close" type="submit" name="action"
+                        class="haeck success primary half-width">Connect
                 </button>
-                <button id="cancelButton" class="haeck secondary half-width floatright">Cancel</button>
+                <a id="cancelButton" class="haeck secondary half-width floatright" aria-label="Close">Cancel</a>
             </div>
         </form>
     </div>
@@ -219,7 +215,7 @@
         </div>
 
         <div class="button-group round">
-            <a href="#!" id="login" class="haeck success primary half-width">Login</a>
+            <button href="#!" id="login" class="haeck success primary half-width">Login</button>
             <a href="#!" id="signup" class="haeck half-width secondary floatright">Sign Up</a>
         </div>
     </form>
@@ -227,31 +223,25 @@
 
 <template name="channelmsg">
     <form class="channelmsg">
-        <div class="large-12 columns">
-            <div class="row collapse">
-                <div class="small-1 columns">
-                    <a id="tabbutton" class="haeck primary nomargin button prefix"><iron-icon icon="icons:search"></iron-icon></a>
-                </div>
-                <div class="small-10 columns">
-                    <input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin"
-                           placeholder="Message">
-                </div>
-                <div class="small-1 columns">
-                    <a id="addbutton" class="haeck primary nomargin button postfix"><iron-icon icon="icons:add"></iron-icon></a>
-                </div>
-
-            </div>
-        </div>
+        <ul class="form">
+            <li><a href="#" id="leftMenu"><i class="fa fa-list"></i></a></li>
+            <li><a href="#" id="tabbutton"><i class="fa fa-search"></i></a></li>
+            <li class="stretch"><input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin" placeholder="Message"></li>
+            <li><a href="#" id="rightMenu"><i class="fa fa-users"></i></a></li>
+        </ul>
     </form>
 </template>
 
 <template name="imageit">
     <div id="imageit-wrapper">
         <div id="content">
-            <p>Using Chrome, IE11 or Firefox? Just use Ctrl-V in the below box to paste most images straight onto ImageIT!</p>
+            <p>Using Chrome, IE11 or Firefox? Just use Ctrl-V in the below box to paste most images straight onto
+                ImageIT!</p>
+
             <div id="paste" contenteditable="">
             </div>
             <p>Not working? Just click the button, and we'll let you choose any image on your PC, phone or tablet.</p>
+
             <div>
                 <form action="/" id="imgUpload" method="post" class="add-entry" enctype="multipart/form-data">
                     <input id="fileInput" name="fileInput" type="file">

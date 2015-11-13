@@ -1,14 +1,15 @@
 @import url(https://fonts.googleapis.com/css?family=Open+Sans:400,300,700);
-body {
-    font-family: 'Open Sans', sans-serif !important;
+
+* {
+    box-sizing: border-box;
+    max-height: 100vh !important;
 }
 
 body {
-    display: flex;
-    flex-direction: column;
+    font-family: 'Open Sans', sans-serif !important;
+    display: block !important;
     height: 100vh;
     max-height: 100%;
-    -webkit-flex-direction: column;
 }
 
 .nav {
@@ -26,10 +27,6 @@ body {
     flex-flow: column;
     padding: 0.25rem;
     width: 100%;
-}
-
-.channelmsg{
-    height: 48px;
 }
 
 .message {
@@ -105,26 +102,9 @@ body {
     background-color: #333;
 }
 
-paper-tabs {
-    background-color: #333;
-    color: #fff;
-}
-
 .channel {
     color: #fff !important;
     font-size: 16px !important;
-}
-
-paper-tabs.transparent-teal::shadow #selectionBar {
-    background-color: #00bcd4;
-}
-
-.floatright {
-    float: right;
-}
-
-paper-icon-button {
-    color: #fff;
 }
 
 .messages {
@@ -139,44 +119,6 @@ paper-icon-button {
 
 .inline {
     display: inline-block;
-}
-
-paper-button  .button-content {
-    margin: 0;
-    padding: 0;
-}
-
-
-paper-tabs {
-    display: none !important;
-}
-
-
-paper-dialog {
-    padding-left: 24px;
-    padding-right: 24px;
-    min-width: 300px;
-}
-
-paper-toast {
-    background-color: #444;
-}
-
-paper-menu-button {
-    padding: 8px;
-}
-
-paper-icon-button {
-    padding: 0px;
-}
-
-paper-material {
-    max-width: 400px;
-    overflow: auto;
-}
-
-paper-item .bold {
-    background-color: #CCCCCC;
 }
 
 .dropdown-content-li {
@@ -263,7 +205,6 @@ body .haeck {
     text-decoration: none;
     -moz-user-select: none;
     position: relative;
-    z-index: 100;
     border-radius: 0.3em;
     height: 2.3125rem;
 }
@@ -286,19 +227,92 @@ body .haeck {
     text-decoration: underline;
 }
 
-@media only screen and (min-width: 150px) and (max-width: 650px){
+.floatright {
+    float: right;
+}
+
+ul.off-canvas-list li a {
+    border-bottom: 1px solid #262626;
+    color: #fff !important;
+    display: block;
+    padding: 0.666667rem;
+    transition: background 300ms ease 0s;
+}
+
+.snap-drawers {
+    position: relative;
+}
+
+.snap-drawer {
+    position: relative;
+    width: 200px;
+    float: left;
+}
+
+.snap-drawer-right {
+    float: right;
+}
+
+.snap-content {
+    position: relative;
+    float: left;
+    width: calc(100% - 400px);
+}
+
+.form {
+    list-style: none;
+    margin: 0;
+    display: -webkit-box;
+    display: -moz-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row wrap;
+    justify-content: flex-end;
+}
+
+.form li {
+    height: 40px;
+}
+
+.form a {
+    display: none;
+    text-decoration: none;
+    color: white;
+    width: 42px;
+    height: 40px;
+    text-align: center;
+    background: #333;
+    padding: 8px;
+}
+
+.stretch {
+    flex: 1 0 auto;
+}
+
+.form a:hover {
+    background: #222;
+}
+.form input {
+    width: 100%;
+    height: 40px;
+    padding: 8px;
+}
+
+
+@media only screen and (min-width: 150px) and (max-width: 800px){
     .top-bar-section ul {
         width: auto;
         height: auto !important;
         display: inline !important;
     }
 
-    .nav {
-        height: 93px;
+    .form a {
+        display: block;
     }
 
-    paper-tabs {
-        display: flex !important;
+    .nav {
+        height: 45px;
     }
 
     .top-bar-section li:not(.has-form) a:not(.button) {
@@ -310,10 +324,25 @@ body .haeck {
     .left-off-canvas-toggle {
         display: block !important;
     }
-}
 
-@media only screen and (min-width: 150px) and (max-width: 400px) {
-    .tab-bar-section.middle {
-        display: none;
+    .snap-drawers {
+        position: absolute;
     }
+
+    .snap-drawer {
+        position: absolute;
+        width: 266px;
+        float: none;
+    }
+
+    .snap-drawer-right {
+        float: none;
+    }
+
+    .snap-content {
+        position: absolute;
+        float: none;
+        width: auto;
+    }
+
 }
