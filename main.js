@@ -31,6 +31,7 @@ if (Meteor.isClient) {
         }
     };
 
+
     Template.channel.events(channelEvent);
     Template.channeltab.events(channelEvent);
 
