@@ -76,7 +76,7 @@ IRC.prototype.connect = function() {
             });
         }
 
-        this.connection.on('error', function (err) {
+        this.connection.on('error', Meteor.bindEnvironment(function (err) {
             console.log("Error: " + err);
             console.log("Error caught! NOT Exiting...");
             IRCConnections.remove({_id: self.config.server_id});
@@ -84,7 +84,7 @@ IRC.prototype.connect = function() {
             IRCChannels.remove({server: self.config.server_id});
 
             serverMessages.notify('serverMessage:' + self.config.user, "Connection error!", err.toString());
-        });
+        }));
 
         this.connection.addListener('connect', function() {
             self.send('NICK', self.config.nick);
