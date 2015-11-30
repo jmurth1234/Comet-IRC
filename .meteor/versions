@@ -46,6 +46,7 @@ matb33:collection-hooks@0.8.1
 maxharris9:hashmap@1.0.1
 meteor@1.1.10
 meteor-base@1.0.1
+meteortypescript:typescript-libs@1.2.8
 minifiers@1.1.7
 minimongo@1.0.10
 mobile-experience@1.0.1
