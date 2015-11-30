@@ -76,8 +76,8 @@ IRC.prototype.connect = function() {
             });
         }
 
-        this.connection.on('uncaughtException', function (err) {
-            console.error(err.stack);
+        this.connection.on('error', function (err) {
+            console.log("Error: " + err);
             console.log("Error caught! NOT Exiting...");
             IRCConnections.remove({_id: this.config.server_id});
             IRCUsers.remove({server: this.config.server_id});
