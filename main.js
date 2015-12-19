@@ -365,13 +365,9 @@ if (Meteor.isClient) {
         var vph = jQuery(window).height();
         jQuery("#messages").height(vph - 130);
 
-        $('.ui.checkbox')
-            .checkbox()
-        ;
+        jQuery('.ui.checkbox').checkbox();
 
-        $('select.dropdown')
-            .dropdown()
-        ;
+        jQuery('select.dropdown').dropdown();
 
         if (window.innerWidth <= 800) {
             snapper = new Snap({
