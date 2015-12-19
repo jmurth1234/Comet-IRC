@@ -25,8 +25,9 @@ ejson
 spacebars
 check
 crosswalk
-ewall:foundation
 jquery
 bdunnette:snapjs
 fortawesome:fontawesome
 meteortypescript:typescript-libs
+semantic:ui
+flemay:less-autoprefixer

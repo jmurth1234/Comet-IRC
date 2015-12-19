@@ -25,38 +25,34 @@
 </div>
 
 <div id="mainContent" class="main snap-content">
-    <div class="nav">
+    <div class="ui top inverted attached menu nav">
         {{> navbar}}
     </div>
-
-
-    <div class="panel" id="messages">
-        <div data-alert class="alert-box secondary">
-            <button class="haeck primary tiny" id="loadmore">Load more scrollback.</button>
+    <div class="ui bottom attached segment">
+        <div class="ui segment" id="messages">
+            <button class="fluid ui button" id="loadmore">Load more scrollback</button>
+            <ul class="messages">
+                {{#each messages}} {{> message}} {{/each}}
+            </ul>
         </div>
-        <ul class="messages">
-            {{#each messages}} {{> message}} {{/each}}
-        </ul>
+        {{> channelmsg}}
     </div>
-
-
-    {{> channelmsg}}
-
 </div>
 
-<div id="connectModal" class="reveal-modal tiny" data-reveal aria-labelledby="Connect" aria-hidden="true" role="dialog">
+<div id="connectModal" class="modal" style="max-width: 600px; display: none;">
     {{> serverconnect}}
 </div>
 
-<div id="loginModal" class="reveal-modal tiny" data-reveal aria-labelledby="Login" aria-hidden="true" role="dialog">
+<div id="loginModal" class="modal" style="max-width: 600px; display: none;" data-reveal aria-labelledby="Login"
+     aria-hidden="true" role="dialog">
     {{> loginform}}
 </div>
 
-<div id="imageitModal" class="reveal-modal" data-reveal aria-labelledby="Upload Image" aria-hidden="true"
+<div id="imageitModal" class="modal" style="max-width: 600px; display: none;" data-reveal aria-labelledby="Upload Image"
+     aria-hidden="true"
      role="dialog">
     {{> imageit}}
 </div>
-
 
 
 <paper-toast id="loginSuccess" text="Logged in successfully!"></paper-toast>
@@ -66,51 +62,24 @@
 </body>
 
 <template name="navbar">
-    <nav class="top-bar">
-        <section class="top-bar-section">
-            {{#if currentUser}}
-                <!-- Left Nav Section -->
-                <ul class="left">
-                    <li class="inline"><a href="#" id="connectModalLink" data-reveal-id="connectModal">Connect</a></li>
-                </ul>
+    {{#if currentUser}}
+        <a href="#connectModal" id="connectModalLink" rel="modal:open" class="ui icon item">
+            <i class="add icon"></i>
+        </a>
 
-                <!-- Right Nav Section -->
-                <ul class="right">
-                    {{#if hasNotifications}}
-                        <paper-menu-button>
-                            <paper-icon-button icon="social:notifications" class="dropdown-trigger"
-                                               vertical-align="top" horizontal-align="right"></paper-icon-button>
-                            <ul class="dropdown-content notifications">
-                                <li class="dropdown-content-li">
-                                    <a class="bold">
-                                        <paper-item>
-                                            <paper-item-body>
-                                                <div>Notifications: {{notificationsCount}}</div>
-                                            </paper-item-body>
-                                        </paper-item>
-                                    </a>
-                                </li>
-                                {{#each notifications}}
-                                    <li class="dropdown-content-li"><a>{{> notification}}</a></li>
-                                {{/each}}
+        <div class="right menu">
+            <a id="logout" class="ui item">
+                Logout
+            </a>
+        </div>
+    {{else}}
+        <div class="right menu">
+            <a class="ui item" href="#loginModal" id="loginModalLink" rel="modal:open">
+                Log in
+            </a>
+        </div>
 
-                            </ul>
-                        </paper-menu-button>
-                    {{else}}
-                        <paper-icon-button icon="social:notifications-none"></paper-icon-button>
-                    {{/if}}
-                    <li class="inline"><a id="logout" href="#">Logout</a></li>
-                </ul>
-
-            {{else}}
-                <ul class="right">
-                    <li class=""><a href="#" id="loginModalLink" data-reveal-id="loginModal">Login / Sign up</a></li>
-                </ul>
-
-            {{/if}}
-
-        </section>
-    </nav>
+    {{/if}}
 
 </template>
 
@@ -161,65 +130,98 @@
 </template>
 
 <template name="serverconnect">
-    <h2>Connect to a Server</h2>
+    <h4 class="ui dividing header">Connect to a Server</h4>
 
-    <div>
-        <form id="connect-form">
+    <form id="server-saved-form" class="ui form vertical">
+        <div class="disabled field">
+            <label>Saved Servers</label>
+            <select class="ui dropdown">
+                    <option value="blank">-- New Server --</option>
+                    <option value="example">Example Server</option>
+            </select>
+        </div>
+
+        <div class="field">
             <label for="irc_server_name">Server Name (Optional)</label>
             <input id="irc_server_name" type="text" class="validate">
+        </div>
 
-            <div class="row collapse">
-                <div class="small-9 large-10 columns">
-                    <label for="irc_server">IRC Server</label>
+        <div class="field" style="margin-bottom: 0;">
+            <label>IRC Server</label>
+
+            <div class="fields">
+                <div class="twelve wide field">
                     <input id="irc_server" type="text" placeholder="Hostname or IP">
                 </div>
-                <div class="small-3 large-2 columns">
-                    <label for="irc_port" style="color: #fff">.</label>
-                    <input type="text" class="postfix" id="irc_port" placeholder="Port">
+                <div class="four wide field">
+                    <input type="text" id="irc_port" placeholder="Port">
                 </div>
             </div>
+        </div>
 
-            <input id="ssl" type="checkbox" class="validate">
-            <label for="ssl">Is this a secure server (SSL)?</label>
 
+        <div class="ui segment toggleheight">
+            <div class="field">
+                <div class="ui toggle checkbox">
+                    <input id="ssl" type="checkbox" class="hidden">
+                    <label>Enable SSL for this connection</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="field">
             <label for="irc_nick">Nickname</label>
             <input id="irc_nick" type="text" class="validate">
+        </div>
 
+        <div class="field">
             <label for="irc_password">IRC Password</label>
             <input id="irc_password" type="password" class="validate">
+        </div>
 
+        <div class="field" style="margin-bottom: 0;">
             <label for="channel">Channel</label>
             <input id="channel" type="text" class="validate">
+        </div>
 
-            <input id="znc" type="checkbox" class="validate">
-            <label for="znc">Is this a ZNC?</label>
-
-            <div class="button-group">
-                <button href="#!" aria-label="Close" type="submit" name="action"
-                        class="haeck success primary half-width">Connect
-                </button>
-                <a id="cancelButton" class="haeck secondary half-width floatright" aria-label="Close">Cancel</a>
+        <div class="ui segment toggleheight">
+            <div class="field">
+                <div class="ui toggle checkbox">
+                    <input id="znc" type="checkbox" class="hidden">
+                    <label>Treat this connection as a ZNC</label>
+                </div>
             </div>
-        </form>
-    </div>
+        </div>
+
+        <div class="ui buttons">
+            <button href="#!" type="submit" name="action" class="ui primary button">Connect</button>
+            <div class="or"></div>
+            <button id="cancelButton" type="button" href="#!" class="ui button">Cancel</button>
+        </div>
+
+    </form>
+
 </template>
 
 <template name="loginform">
-    <form class="row">
-        <div class="input-field">
+    <form class="ui form vertical">
+        <div class="field">
             <label for="username">Username</label>
             <input id="username" type="text" class="validate">
         </div>
-        <div class="input-field">
+
+        <div class="field">
             <label for="password">Password</label>
             <input id="password" type="password" class="validate">
         </div>
 
-        <div class="button-group round">
-            <button href="#!" id="login" class="haeck success primary half-width">Login</button>
-            <a href="#!" id="signup" class="haeck half-width secondary floatright">Sign Up</a>
+        <div class="ui buttons">
+            <button href="#!" id="login" class="ui primary button">Login</button>
+            <div class="or"></div>
+            <button href="#!" id="signup" class="ui button">Sign Up</button>
         </div>
     </form>
+
 </template>
 
 <template name="channelmsg">
@@ -227,7 +229,8 @@
         <ul class="form">
             <li><a href="#" id="leftMenu"><i class="fa fa-list"></i></a></li>
             <li><a href="#" id="tabbutton"><i class="fa fa-search"></i></a></li>
-            <li class="stretch"><input type="text" id="msginput" name="irc_msg" autocomplete="off" class="nomargin" placeholder="Message"></li>
+            <li class="ui form stretch"><input type="text" id="msginput" name="irc_msg" autocomplete="off"
+                                               class="nomargin" placeholder="Message"></li>
             <li><a href="#" id="rightMenu"><i class="fa fa-users"></i></a></li>
         </ul>
     </form>

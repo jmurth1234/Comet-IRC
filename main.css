@@ -12,26 +12,42 @@ body {
     max-height: 100%;
 }
 
+ul {
+    padding: 0;
+}
+
 .nav {
-    height: 45px;
+    background-color: #333 !important;
+}
+
+.main {
+    overflow: hidden;
 }
 
 .bold {
     font-weight: bold !important;
 }
 
-.panel {
+.vertical {
+    flex-direction: column;
+    -webkit-flex-flow: column !important;
+    justify-content: flex-start !important;
+}
+
+#messages {
     overflow: auto;
     flex: auto;
     margin-bottom: 0px;
     flex-flow: column;
-    padding: 0.25rem;
+    padding: 0.25rem !important;
     width: 100%;
+    background: #eee;
 }
 
 .message {
     word-wrap: break-word;
     -ms-word-wrap: break-word;
+    margin-bottom: 2px;
 }
 
 .columns > .row {
@@ -53,10 +69,6 @@ body {
 .large-12.columns {
     padding: 0px;
     margin: 0px;
-}
-
-.button {
-    padding: 0px !important;
 }
 
 .button.success, .button.secondary {
@@ -85,11 +97,6 @@ body {
 
 #loadmore {
     text-align: center;
-    width: 200px;
-    margin: 0 auto;
-    padding: 0.25rem 1rem 0.25rem 1rem !important;
-    margin-bottom: 0px;
-    display: block;
 }
 
 .alert-box.secondary {
@@ -97,9 +104,21 @@ body {
 }
 
 .off-canvas-list {
+    margin: 0;
+    padding: 4px;
     height: 100vh;
     overflow: auto;
     background-color: #333;
+    list-style: none;
+}
+
+.off-canvas-list li label {
+    color: #fff;
+    font-weight: bold;
+    border-bottom: 1px solid #262626;
+    display: block;
+    padding: 0.666667rem;
+    transition: background 300ms ease 0s;
 }
 
 .channel {
@@ -158,64 +177,6 @@ body {
 .highlight {
     color: #aa0000 !important;
     font-weight: bold;
-}
-
-/** button CSS **/
-
-.haeck.primary {
-    background-color: #333;
-}
-
-.haeck.success {
-    background-color: #368A55;
-}
-
-.haeck.secondary {
-    background-color: #333;
-    color: #fff;
-}
-
-.haeck.primary, .haeck.secondary {
-    margin: 0.1em 0px;
-    padding: 0px 1em;
-}
-.haeck:hover, .haeck:focus {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.15) 49%, rgba(0, 0, 0, 0.1) 51%, rgba(0, 0, 0, 0.15));
-}
-body .haeck {
-    margin: 8px 4px;
-    font-size: 13px;
-}
-.haeck, a.haeck {
-    border-width: 1px;
-    border-style: solid;
-    -moz-border-top-colors: none;
-    -moz-border-right-colors: none;
-    -moz-border-bottom-colors: none;
-    -moz-border-left-colors: none;
-    border-image: none;
-    border-color: rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.2) rgba(0, 0, 0, 0.4);
-    color: #FFF;
-    box-shadow: 0px 0.08em 0px rgba(255, 255, 255, 0.4) inset, 0px 0px 0.1em rgba(255, 255, 255, 0.9) inset;
-    cursor: pointer;
-    display: inline-block;
-    font: bold 100%/2.1 "Lucida Grande",Tahoma,sans-serif;
-    padding: 0px 0.95em 0px 0px;
-    text-align: center;
-    text-decoration: none;
-    -moz-user-select: none;
-    position: relative;
-    border-radius: 0.3em;
-    height: 2.3125rem;
-}
-
-.haeck {
-    background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05) 49%, rgba(0, 0, 0, 0.05) 51%, rgba(0, 0, 0, 0.1));
-}
-
-.haeck.tiny {
-    height: 1.75rem;
-    font-size: 0.75em;
 }
 
 .user {
@@ -301,6 +262,30 @@ ul.off-canvas-list li a {
 
 .off-canvas-list {
     overflow-x: hidden;
+}
+
+.segment {
+    padding: 12px 12px !important;
+    min-height: 47px;
+}
+
+.toggleheight {
+    height: 47px;
+}
+
+.ui.buttons {
+    margin-bottom: 10px;
+}
+
+.ui.form .disabled.fields .field, .ui.form .disabled.field, .ui.form .field :disabled {
+    pointer-events: none;
+    opacity: 0.7 !important;
+}
+
+.ui.form .disabled.field > .selection.dropdown {
+    opacity: 0.7;
+    background: #ddd;
+    width: 100%;
 }
 
 @media only screen and (min-width: 150px) and (max-width: 800px){

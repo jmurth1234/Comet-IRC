@@ -233,10 +233,10 @@ if (Meteor.isClient) {
                 toastr.info("If you didn't specify a channel to join, use the command /join", "You're now connected!")
             });
 
-            $('#connectModal').foundation('reveal', 'close');
+            $.modal.close();
         },
         "click #cancelButton": function () {
-            $('#connectModal').foundation('reveal', 'close');
+            $.modal.close();
         }
     });
 
@@ -326,8 +326,10 @@ if (Meteor.isClient) {
             // Meteor.loginWithPassword() function.
             Meteor.loginWithPassword(username, password, function (err) {
                 if (!err) {
-                    $('#loginModal').foundation('reveal', 'close');
+                    $.modal.close();
                     toastr.info("", "Logged in!")
+                } else {
+                    toastr.info("", "An error occurred! Check your username and password is correct")
                 }
             });
             return false;
@@ -348,8 +350,10 @@ if (Meteor.isClient) {
                 password: password
             }, function (err) {
                 if (!err) {
-                    $('#loginModal').foundation('reveal', 'close');
+                    $.modal.close();
                     toastr.info("", "Logged in!")
+                } else {
+                    toastr.info("", "An error occurred! Your username probably already exists.")
                 }
             });
             return false;
@@ -359,18 +363,15 @@ if (Meteor.isClient) {
 
     Template.body.rendered = function () {
         var vph = jQuery(window).height();
-        jQuery(".panel").height(vph - 96);
+        jQuery("#messages").height(vph - 130);
 
-        jQuery(document).on('closed.fndtn.reveal', '[data-reveal]', function () {
-            var modal = jQuery(this);
-            if (modal.attr('id') === "loginModal") {
-                console.log("closing loginModal!");
-                if (!Meteor.userId()) {
-                    console.log("not logged in! opening loginModal!");
-                    jQuery('#loginModalLink').trigger('click');
-                }
-            }
-        });
+        $('.ui.checkbox')
+            .checkbox()
+        ;
+
+        $('select.dropdown')
+            .dropdown()
+        ;
 
         if (window.innerWidth <= 800) {
             snapper = new Snap({
@@ -378,8 +379,17 @@ if (Meteor.isClient) {
             });
         }
 
+        window.onresize = function () {
+            var vph = jQuery(window).height();
+            jQuery("#messages").height(vph - 130);
+        }
+
         if (!Meteor.userId()) {
-            jQuery('#loginModalLink').trigger('click');
+            $("#loginModal").modal({
+                escapeClose: false,
+                clickClose: false,
+                showClose: false
+            });
         }
 
     };
@@ -564,7 +574,7 @@ if (Meteor.isClient) {
     window.onresize = window.onload = function () {
         var vph = jQuery(window).height();
 
-        jQuery(".panel").height(vph - 96);
+        jQuery(".panel").height(vph - 120);
 
         if (window.innerWidth <= 800) {
             snapper = new Snap({
