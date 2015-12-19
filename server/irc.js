@@ -46,7 +46,6 @@ IRC.prototype.connect = function() {
             rejectUnauthorized: false
         };
 
-
         if (self.config.ssl) {
             console.log('connecting vis ssl');
             self.connection = tls.connect(connectionOptions, function () {
