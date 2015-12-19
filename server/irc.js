@@ -76,15 +76,15 @@ IRC.prototype.connect = function() {
             });
         }
 
-        this.connection.on('uncaughtException', function (err) {
-            console.error(err.stack);
+        this.connection.on('error', Meteor.bindEnvironment(function (err) {
+            console.log("Error: " + err);
             console.log("Error caught! NOT Exiting...");
-            IRCConnections.remove({_id: this.config.server_id});
-            IRCUsers.remove({server: this.config.server_id});
-            IRCChannels.remove({server: this.config.server_id});
+            IRCConnections.remove({_id: self.config.server_id});
+            IRCUsers.remove({server: self.config.server_id});
+            IRCChannels.remove({server: self.config.server_id});
 
             serverMessages.notify('serverMessage:' + self.config.user, "Connection error!", err.toString());
-        });
+        }));
 
         this.connection.addListener('connect', function() {
             self.send('NICK', self.config.nick);
