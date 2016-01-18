@@ -7,7 +7,7 @@ var tls = Npm.require('tls');
  * Creates the IRC instance
  * @param params optional preferences for the connection
  */
-IRC = function IRC(params) {
+var IRC = function IRC(params) {
     this.connection = null;
     this.buffer = '';
     this.options = {
@@ -28,7 +28,7 @@ IRC = function IRC(params) {
         ssl: (params && params.ssl) || false
     };
 
-    this.channels = ["something"];
+    //this.channels = ["something"];
 };
 
 /**
