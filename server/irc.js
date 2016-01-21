@@ -7,325 +7,318 @@ var tls = Npm.require('tls');
  * Creates the IRC instance
  * @param params optional preferences for the connection
  */
-var IRC = function IRC(params) {
-    this.connection = null;
-    this.buffer = '';
-    this.options = {
-        server: (params && params.server) || 'irc.freenode.net',
-        port: (params && params.port) || 6667
-    };
-    this.config = {
-        nick: (params && params.nick) || 'meteorirc',
-        password: (params && params.password) || '',
-        realname: (params && params.realname) || 'Meteor IRC',
-        username: (params && params.username) || 'Meteor-IRC',
-        channels: (params && params.channels) || [],
-        debug: (params && params.debug) || true,
-        user: (params && params.user) || 0,
-        server_id: (params && params.server_id) || "",
-        stripColors: (params && params.stripColors) || true,
-        znc: (params && params.znc) || false,
-        ssl: (params && params.ssl) || false
-    };
-
-    //this.channels = ["something"];
-};
-
-/**
- * connect
- *
- * Connects to the IRC server, sets up listeners for certain events
- */
-IRC.prototype.connect = function() {
-    var self = this;
-    try {
-        // socket opts
-        var connectionOptions = {
-            host: self.options.server,
-            port: self.options.port,
-            rejectUnauthorized: false
+IRC = class IRC {
+    constructor(params) {
+        this.connection = null;
+        this.buffer = '';
+        this.options = {
+            server: (params && params.server) || 'irc.freenode.net',
+            port: (params && params.port) || 6667
         };
-
-        if (self.config.ssl) {
-            console.log('connecting vis ssl');
-            self.connection = tls.connect(connectionOptions, function () {
-                // callback called only after successful socket connection
-                self.connection.connected = true;
-                self.connection.setEncoding('utf8');
-
-                self.send('NICK', self.config.nick);
-                self.send('USER', self.config.username, 8, "*", self.config.realname);
-
-                if (self.config.znc) {
-                    self.send('CAP', 'LS');
-                    self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-                    self.send('CAP', 'END');
-                }
-
-                if (self.config.password !== "")
-                    self.send('PASS', self.config.password);
-
-                _.each(self.config.channels, function (channel) {
-                    self.send('JOIN', channel);
-                });
-            });
-        } else {
-            self.connection = net.createConnection(self.options.port, self.options.server, function() {
-                if (self.config.debug) console.log('connecting...');
-            });
-        }
-
-        this.connection.on('error', Meteor.bindEnvironment(function (err) {
-            console.log("Error: " + err);
-            console.log("Error caught! NOT Exiting...");
-            IRCConnections.remove({_id: self.config.server_id});
-            IRCUsers.remove({server: self.config.server_id});
-            IRCChannels.remove({server: self.config.server_id});
-
-            serverMessages.notify('serverMessage:' + self.config.user, "Connection error!", err.toString());
-        }));
-
-        this.connection.addListener('connect', function() {
-            self.send('NICK', self.config.nick);
-            self.send('USER', self.config.username, 8, "*", self.config.realname);
-
-            if (self.config.znc) {
-                self.send('CAP', 'LS');
-                self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-                self.send('CAP', 'END');
-            }
-
-            if (self.config.password !== "")
-                self.send('PASS', self.config.password);
-
-            _.each(self.config.channels, function(channel) {
-                self.send('JOIN', channel);
-            });
-        });
-
-        //wrap in a meteor environment in order to use x.insert()
-        //fixme: on motd, identify with nickserv
-        this.connection.addListener('data', Meteor.bindEnvironment(function(chunk) {
-            self.buffer += chunk;
-            var lines = self.buffer.split("\r\n");
-            self.buffer = lines.pop();
-            //console.log(lines);
-            lines.forEach(function(dirtyLine) {
-                var line = self.parseLine(dirtyLine);
-
-                switch (line.command) {
-                    case "PING":
-                        self.send("PONG", line.args[0]);
-                        break;
-                    case "VERSION":
-                        self.send("METEOR-IRC 1.0", line.args[0]);
-                        break;
-                    case "NOTICE":
-                        var nick = line.nick ? line.nick.toLowerCase() : '';
-                        var text = line.args[1] ? line.args[1].toLowerCase() : '';
-                        if (nick === 'nickserv') {
-                            if (text.indexOf('registered') != -1) {
-                                self.say('nickserv', 'IDENTIFY ' + self.config.password);
-                            } else if (text.indexOf('invalid') != -1) {
-                                self.nick(self.config.nick + Math.floor(Math.random() * 10));
-                            }
-                        }
-                        break;
-                    case "PRIVMSG":
-                        var handle = line.nick;
-                        var channel = line.args[0];
-
-                        if (line.args[0] == self.config.nick) {
-                            channel = handle;
-                        }
-
-                        var text = line.args[1];
-                        var action = false;
-                        if (text.substring(1, 7) === 'ACTION') {
-                            var text = text.substring(8);
-                            action = true;
-                        }
-
-                        var date;
-                        if ("server_time" in line)
-                            date = line.server_time;
-
-                        var highlighted = text.indexOf(self.config.nick) !== -1;
-                        if (highlighted) {
-                            console.log("mentioned!")
-                            serverMessages.notify('serverMessage:' + self.config.user, "You were mentioned in " + channel + " by " + handle, text);
-
-                            IRCPings.insert({
-                                handle: handle,
-                                channel: channel,
-                                server: self.config.server_id,
-                                text: escapeHtml(text),
-                                date_time: date || new Date(),
-                                action: action,
-                                user: self.config.user
-                            });
-                        }
-
-                        addMessageToDb(self, channel, handle, text, action, date, highlighted);
-
-                        if (self.channels.indexOf(channel) === -1) {
-                            self.channels.push(channel);
-                            IRCChannels.insert({
-                                channel: channel,
-                                server: self.config.server_id,
-                                sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                                user: self.config.user
-                            });
-                        }
-
-                        break;
-                    case "QUIT":
-                        // TODO
-                        break;
-                    case "PART":
-                        addMessageToDb(self, line.args[0], "", line.prefix + " left the channel!", true);
-
-                        if (self.channels.indexOf(line.args[0]) === -1) {
-                            self.channels.push(line.args[0]);
-                            IRCChannels.insert({
-                                channel: line.args[0],
-                                server: self.config.server_id,
-                                sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                                user: self.config.user,
-                            });
-                        }
-
-                        break;
-                    case "JOIN":
-                        addMessageToDb(self, line.args[0], "", line.prefix + " joined the channel!", true);
-
-                        if (self.channels.indexOf(line.args[0]) === -1) {
-                            self.channels.push(line.args[0]);
-                            IRCChannels.insert({
-                                channel: line.args[0],
-                                server: self.config.server_id,
-                                sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
-                                user: self.config.user,
-                            });
-                        }
-
-                        break;
-                    case "353":
-                        if (line.args[0] !== self.config.nick)
-                            self.config.nick = line.args[0];
-
-                        var userList = line.args[3].split(" ");
-
-                        //var addUsers = function (userList) {
-                        Meteor.defer( function () {
-                                userList.forEach(function (s) {
-                                    var user_sorting = s.toLowerCase().replace("@", "").replace("+", "");
-                                    var user_norank = s.replace("@", "").replace("+", "");
-                                    IRCUsers.insert({
-                                        channel: line.args[2],
-                                        server: self.config.server_id,
-                                        ircuser: s,
-                                        ircuser_norank: user_norank,
-                                        ircuser_sorting: user_sorting,
-                                        user: self.config.user,
-                                    });
-                                })
-                            }
-                        );
-
-                        //var addUsersAsync = Meteor.wrapAsync(addUsers);
-                        //addUsersAsync(userList);
-
-                        break;
-                    case "332":
-                        addMessageToDb(self, line.args[1], "Channel Topic: ", line.args[2], true);
-                        break;
-                    case "NICK":
-                        // TODO: handle nick changes
-                        // DEPENDS ON LIST OF USERS
-                        break;
-                    case "433":
-                        self.send('NICK', self.config.nick + "_");
-                        self.send('USER', self.config.username, 8, "*", self.config.realname);
-
-                        if (self.config.znc) {
-                            self.send('CAP', 'LS');
-                            self.send('CAP', 'REQ', 'znc.in/server-time-iso');
-                            self.send('CAP', 'END');
-                        }
-
-                        if (self.config.password !== "")
-                            self.send('PASS', self.config.password);
-
-                        _.each(self.config.channels, function(channel) {
-                            self.send('JOIN', channel);
-                        });
-                        break;
-                    default:
-                        break;
-                }
-            });
-        }, function(e) {
-            Meteor._debug("Exception from connection close callback:", e);
-        }));
-
-        this.connection.addListener('drain', function() {
-            self.buffer = '';
-        });
-
-        this.connection.addListener('close', function() {
-            if (self.config.debug) console.log('disconnected');
-        })
-
-        function addMessageToDb(self, chan, user, message, action, date, highlighted) {
-            if (date === undefined) {
-                date = new Date();
-            }
-
-            if (highlighted === undefined) {
-                highlighted = false;
-            }
-
-            date = date || new Date();
-
-            var cssClass = [];
-
-            if (highlighted) {
-                cssClass.push("highlight");
-            }
-
-            if (user === self.config.nick) {
-                cssClass.push("self");
-            }
-
-            //insert irc message into db
-            IRCMessages.insert({
-                handle: user,
-                channel: chan,
-                server: self.config.server_id,
-                text: escapeHtml(message),
-                css: cssClass.join(" "),
-                date_time: date.toString(),
-                date_sort: date,
-                time: "",
-                action: action,
-                user: self.config.user,
-                irc: true,
-                bot: false
-            });
-        }
-
-    } catch (e) {
-        console.log(e);
-        self.disconnect("An error occurred in this irc client, bailing!");
-
-        IRCConnections.remove({server: self.config.server_id});
-        IRCUsers.remove({server: self.config.server_id});
-        IRCChannels.remove({server: self.config.server_id});
-
+        this.config = {
+            nick: (params && params.nick) || 'meteorirc',
+            password: (params && params.password) || '',
+            realname: (params && params.realname) || 'Meteor IRC',
+            username: (params && params.username) || 'Meteor-IRC',
+            channels: (params && params.channels) || [],
+            debug: false,
+            user: (params && params.user) || 0,
+            server_id: (params && params.server_id) || "",
+            stripColors: (params && params.stripColors) || true,
+            znc: (params && params.znc) || false,
+            ssl: (params && params.ssl) || false
+        };
+        this.channels = [];
     }
 
+    connect() {
+        try {
+            // socket opts
+            var connectionOptions = {
+                host: this.options.server,
+                port: this.options.port,
+                rejectUnauthorized: false
+            };
+
+            if (this.config.ssl) {
+                console.log('connecting vis ssl');
+                this.connection = tls.connect(connectionOptions, function () {
+                    // callback called only after successful socket connection
+                    this.connection.connected = true;
+                    this.connection.setEncoding('utf8');
+
+                    this.send('NICK', this.config.nick);
+                    this.send('USER', this.config.username, 8, "*", this.config.realname);
+
+                    this.send('CAP', 'LS');
+                    this.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                    this.send('CAP', 'END');
+
+                    if (this.config.password !== "")
+                        this.send('PASS', this.config.password);
+
+                    _.each(this.config.channels, function (channel) {
+                        this.send('JOIN', channel);
+                    });
+                });
+            } else {
+                this.connection = net.createConnection(this.options.port, this.options.server, () => {
+                    if (this.config.debug) console.log('connecting...');
+                });
+            }
+
+            this.connection.on('error', Meteor.bindEnvironment(function (err) {
+                console.log("Error: " + err);
+                console.log("Error caught! NOT Exiting...");
+                IRCConnections.remove({_id: this.config.server_id});
+                IRCUsers.remove({server: this.config.server_id});
+                IRCChannels.remove({server: this.config.server_id});
+
+                serverMessages.notify('serverMessage:' + this.config.user, "Connection error!", err.toString());
+            }));
+
+            this.connection.addListener('connect', () => {
+                this.send('NICK', this.config.nick);
+                this.send('USER', this.config.username, 8, "*", this.config.realname);
+
+                if (this.config.znc) {
+                    this.send('CAP', 'LS');
+                    this.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                    this.send('CAP', 'END');
+                }
+
+                if (this.config.password !== "")
+                    this.send('PASS', this.config.password);
+
+                _.each(this.config.channels, function (channel) {
+                    this.send('JOIN', channel);
+                });
+            });
+
+            //wrap in a meteor environment in order to use x.insert()
+            //fixme: on motd, identify with nickserv
+            this.connection.addListener('data', Meteor.bindEnvironment((chunk) => this.handleLine(chunk)), function (e) {
+                Meteor._debug("Exception from connection close callback:", e);
+            });
+
+            this.connection.addListener('drain', function () {
+                this.buffer = '';
+            });
+
+            this.connection.addListener('close', () => {
+                if (this.config.debug) console.log('disconnected');
+            })
+
+
+        } catch (e) {
+            console.log(e);
+            this.disconnect("An error occurred in this irc client, bailing!");
+
+            IRCConnections.remove({server: this.config.server_id});
+            IRCUsers.remove({server: this.config.server_id});
+            IRCChannels.remove({server: this.config.server_id});
+
+        }
+    }
+
+    handleLine(chunk) {
+        this.buffer += chunk;
+        var lines = this.buffer.split("\r\n");
+        this.buffer = lines.pop();
+        //console.log(lines);
+        lines.forEach((dirtyLine) => {
+            var line = this.parseLine(dirtyLine);
+
+            switch (line.command) {
+                case "PING":
+                    this.send("PONG", line.args[0]);
+                    break;
+                case "VERSION":
+                    this.send("METEOR-IRC 1.0", line.args[0]);
+                    break;
+                case "NOTICE":
+                    var nick = line.nick ? line.nick.toLowerCase() : '';
+                    var text = line.args[1] ? line.args[1].toLowerCase() : '';
+                    if (nick === 'nickserv') {
+                        if (text.indexOf('registered') != -1) {
+                            this.say('nickserv', 'IDENTIFY ' + this.config.password);
+                        } else if (text.indexOf('invalid') != -1) {
+                            this.nick(this.config.nick + Math.floor(Math.random() * 10));
+                        }
+                    }
+                    break;
+                case "PRIVMSG":
+                    var handle = line.nick;
+                    var channel = line.args[0];
+
+                    if (line.args[0] == this.config.nick) {
+                        channel = handle;
+                    }
+
+                    var text = line.args[1];
+                    var action = false;
+                    if (text.substring(1, 7) === 'ACTION') {
+                        var text = text.substring(8);
+                        action = true;
+                    }
+
+                    var date;
+                    if ("server_time" in line)
+                        date = line.server_time;
+
+                    var highlighted = text.indexOf(this.config.nick) !== -1;
+                    if (highlighted) {
+                        console.log("mentioned!")
+                        serverMessages.notify('serverMessage:' + this.config.user, "You were mentioned in " + channel + " by " + handle, text);
+
+                        IRCPings.insert({
+                            handle: handle,
+                            channel: channel,
+                            server: this.config.server_id,
+                            text: escapeHtml(text),
+                            date_time: date || new Date(),
+                            action: action,
+                            user: this.config.user
+                        });
+                    }
+
+                    this.addMessageToDb(channel, handle, text, action, date, highlighted);
+
+                    if (this.channels.indexOf(channel) === -1) {
+                        this.channels.push(channel);
+                        IRCChannels.insert({
+                            channel: channel,
+                            server: this.config.server_id,
+                            sortChannel: channel.toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                            user: this.config.user
+                        });
+                    }
+
+                    break;
+                case "QUIT":
+                    // TODO
+                    break;
+                case "PART":
+                    this.addMessageToDb(line.args[0], "", line.prefix + " left the channel!", true);
+
+                    if (this.channels.indexOf(line.args[0]) === -1) {
+                        this.channels.push(line.args[0]);
+                        IRCChannels.insert({
+                            channel: line.args[0],
+                            server: this.config.server_id,
+                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                            user: this.config.user,
+                        });
+                    }
+
+                    break;
+                case "JOIN":
+                    this.addMessageToDb(this, line.args[0], "", line.prefix + " joined the channel!", true);
+
+                    if (this.channels.indexOf(line.args[0]) === -1) {
+                        this.channels.push(line.args[0]);
+                        IRCChannels.insert({
+                            channel: line.args[0],
+                            server: this.config.server_id,
+                            sortChannel: line.args[0].toLowerCase().replace(/[^a-zA-Z0-9]/g, ''),
+                            user: this.config.user,
+                        });
+                    }
+
+                    break;
+                case "353":
+                    if (line.args[0] !== this.config.nick)
+                        this.config.nick = line.args[0];
+
+                    var userList = line.args[3].split(" ");
+
+                    //var addUsers = function (userList) {
+                    Meteor.defer(function () {
+                            userList.forEach(function (s) {
+                                var user_sorting = s.toLowerCase().replace("@", "").replace("+", "");
+                                var user_norank = s.replace("@", "").replace("+", "");
+                                IRCUsers.insert({
+                                    channel: line.args[2],
+                                    server: this.config.server_id,
+                                    ircuser: s,
+                                    ircuser_norank: user_norank,
+                                    ircuser_sorting: user_sorting,
+                                    user: this.config.user,
+                                });
+                            })
+                        }
+                    );
+
+                    //var addUsersAsync = Meteor.wrapAsync(addUsers);
+                    //addUsersAsync(userList);
+
+                    break;
+                case "332":
+                    addMessageToDb(line.args[1], "Channel Topic: ", line.args[2], true);
+                    break;
+                case "NICK":
+                    // TODO: handle nick changes
+                    // DEPENDS ON LIST OF USERS
+                    break;
+                case "433":
+                    this.send('NICK', this.config.nick + "_");
+                    this.send('USER', this.config.username, 8, "*", this.config.realname);
+
+                    if (this.config.znc) {
+                        this.send('CAP', 'LS');
+                        this.send('CAP', 'REQ', 'znc.in/server-time-iso');
+                        this.send('CAP', 'END');
+                    }
+
+                    if (this.config.password !== "")
+                        this.send('PASS', this.config.password);
+
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+
+    addMessageToDb(chan, user, message, action, date, highlighted) {
+        if (date === undefined) {
+            date = new Date();
+        }
+
+        if (highlighted === undefined) {
+            highlighted = false;
+        }
+
+        date = date || new Date();
+
+        var cssClass = [];
+
+        if (highlighted) {
+            cssClass.push("highlight");
+        }
+
+        if (user === this.config.nick) {
+            cssClass.push("this");
+        }
+
+        //insert irc message into db
+        IRCMessages.insert({
+            handle: user,
+            channel: chan,
+            server: this.config.server_id,
+            text: escapeHtml(message),
+            css: cssClass.join(" "),
+            date_time: date.toString(),
+            date_sort: date,
+            time: "",
+            action: action,
+            user: this.config.user,
+            irc: true,
+            bot: false
+        });
+    }
 };
+
 
 /**
  *join
@@ -333,7 +326,7 @@ IRC.prototype.connect = function() {
  * sends a join command to the irc server
  * @param channel to join
  */
-IRC.prototype.join = function(channel) {
+IRC.prototype.join = function (channel) {
     if (this.connection) {
         this.channels.push(channel);
         this.send.apply(this, ['JOIN'].concat(channel));
@@ -352,7 +345,7 @@ IRC.prototype.join = function(channel) {
  * sends a part command to the irc server
  * @param channel to part
  */
-IRC.prototype.part = function(channel) {
+IRC.prototype.part = function (channel) {
     if (this.connection) {
         this.channels.pop(channel);
         this.send.apply(this, ['PART'].concat(channel));
@@ -371,7 +364,7 @@ IRC.prototype.part = function(channel) {
  * sends a nick command to the irc server
  * @param nickname
  */
-IRC.prototype.nick = function(nickname) {
+IRC.prototype.nick = function (nickname) {
     if (this.connection) {
         this.send.apply(this, ['NICK'].concat(nickname));
     }
@@ -383,7 +376,7 @@ IRC.prototype.nick = function(nickname) {
  * sends a command to the irc server
  * @param command the command to send to the irc server
  */
-IRC.prototype.send = function(command) {
+IRC.prototype.send = function (command) {
     var args = Array.prototype.slice.call(arguments);
 
     if (args[args.length - 1].match(/\s/) || args[args.length - 1].match(/^:/) || args[args.length - 1] === "") {
@@ -402,7 +395,7 @@ IRC.prototype.send = function(command) {
  * @param channel the channel to send to
  * @param message the message
  */
-IRC.prototype.say = function(channel, message) {
+IRC.prototype.say = function (channel, message) {
     //insert irc message into db
     var date = new Date();
     var currentTime = "";
@@ -432,7 +425,7 @@ IRC.prototype.say = function(channel, message) {
     this.send('PRIVMSG', channel, message);
 };
 
-IRC.prototype.action = function(channel, message) {
+IRC.prototype.action = function (channel, message) {
     //insert irc message into db
     var date = new Date()
     var currentTime = "";
@@ -468,7 +461,7 @@ IRC.prototype.action = function(channel, message) {
  * disconnects from a server
  * @param msg the quit message
  */
-IRC.prototype.disconnect = function(msg) {
+IRC.prototype.disconnect = function (msg) {
     var message = msg || 'Powered by Comet-IRC https://github.com/rymate1234/Comet-IRC';
     this.send("QUIT", message);
 
@@ -485,7 +478,7 @@ IRC.prototype.disconnect = function(msg) {
  * transforms response from irc server into something usable
  * @param line the raw object received from the irc server
  */
-IRC.prototype.parseLine = function(line) {
+IRC.prototype.parseLine = function (line) {
     var message = {};
     var match;
     var stripColors = this.config.stripColors || true;
@@ -562,7 +555,7 @@ function escapeHtml(string) {
 
 
 function localize_date(date) {
-    var newDate = new Date(date.getTime()+date.getTimezoneOffset()*60*1000);
+    var newDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
 
     var offset = date.getTimezoneOffset() / 60;
     var hours = date.getHours();
