@@ -513,13 +513,7 @@ if (Meteor.isServer) {
             client.connect();
 
             connections.addItem(serverId, client);
-
-            if (json.channel !== "") {
-                Meteor.setTimeout(function () {
-                    client.join(json.channel);
-                }, 10000);
-            }
-
+            
             return serverId;
         },
 
